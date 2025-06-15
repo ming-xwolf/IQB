@@ -2,241 +2,634 @@
 
 ## 🎯 核心知识点
 
-- Flexbox布局系统
+- CSS盒模型与布局原理
+- Flexbox弹性布局
 - Grid网格布局
-- 响应式设计原理
-- CSS盒模型
-- 定位机制
-- 媒体查询
+- 响应式设计策略
+- CSS预处理器
+- 现代CSS特性
 
-## 📊 CSS布局技术关联图
+## 📊 CSS布局技术演进图
 
 ```mermaid
 graph TD
     A[CSS布局技术] --> B[传统布局]
-    A --> C[Flexbox布局]
-    A --> D[Grid布局]
-    A --> E[响应式设计]
+    A --> C[现代布局]
+    A --> D[响应式布局]
     
-    B --> B1[Normal Flow]
-    B --> B2[Float布局]
-    B --> B3[Position定位]
+    B --> B1[Float浮动]
+    B --> B2[Position定位]
+    B --> B3[Display属性]
     B --> B4[Table布局]
     
-    C --> C1[主轴对齐]
-    C --> C2[交叉轴对齐]
-    C --> C3[弹性伸缩]
-    C --> C4[换行控制]
+    C --> C1[Flexbox]
+    C --> C2[Grid]
+    C --> C3[Multi-column]
+    C --> C4[CSS Shapes]
     
-    D --> D1[网格线]
-    D --> D2[网格区域]
-    D --> D3[自动布局]
-    D --> D4[对齐控制]
-    
-    E --> E1[媒体查询]
-    E --> E2[流体布局]
-    E --> E3[弹性图片]
-    E --> E4[断点设计]
+    D --> D1[Media Queries]
+    D --> D2[Fluid Grid]
+    D --> D3[Flexible Images]
+    D --> D4[Mobile First]
 ```
 
 ## 💡 面试题目
 
 ### 🟢 初级题目
 
-#### 1. **[初级]** 解释CSS盒模型及其两种模式
+#### 1. **[初级]** CSS盒模型和布局基础
 
-**标签**: 盒模型, box-sizing, 布局基础
+**标签**: 盒模型, 标准流, 浮动, 定位
 
 **题目描述**:
-请详细说明CSS盒模型的组成部分，以及标准盒模型和IE盒模型的区别。
+请详细说明CSS盒模型的组成，以及不同布局方式的特点和使用场景。
 
 **核心答案**:
 
-**CSS盒模型组成**:
+**CSS盒模型详解**:
+
 ```css
-/* 盒模型组成：从内到外 */
-.box {
-    content: "内容区";
-    padding: 20px;    /* 内边距 */
-    border: 2px solid #000;  /* 边框 */
-    margin: 10px;     /* 外边距 */
-}
-```
-
-**两种盒模型对比**:
-
-```mermaid
-graph TD
-    A[CSS盒模型] --> B[标准盒模型<br/>box-sizing: content-box]
-    A --> C[IE盒模型<br/>box-sizing: border-box]
-    
-    B --> B1[width = content]
-    B --> B2[总宽度 = width + padding + border + margin]
-    
-    C --> C1[width = content + padding + border]
-    C --> C2[总宽度 = width + margin]
-```
-
-**实际示例**:
-```css
+/* 标准盒模型 vs IE盒模型 */
 .standard-box {
     box-sizing: content-box; /* 默认值 */
     width: 200px;
     padding: 20px;
-    border: 2px solid #333;
+    border: 5px solid #ccc;
     margin: 10px;
-    
-    /* 实际占用宽度: 200 + 40 + 4 + 20 = 264px */
+    /* 实际宽度 = 200 + 20*2 + 5*2 = 250px */
 }
 
 .border-box {
     box-sizing: border-box;
     width: 200px;
     padding: 20px;
-    border: 2px solid #333;
+    border: 5px solid #ccc;
     margin: 10px;
-    
-    /* 实际占用宽度: 200 + 20 = 220px */
-    /* 内容区宽度: 200 - 40 - 4 = 156px */
+    /* 实际宽度 = 200px (包含padding和border) */
+    /* 内容宽度 = 200 - 20*2 - 5*2 = 150px */
 }
-```
 
-**最佳实践**:
-```css
-/* 全局设置为border-box，更直观 */
+/* 全局设置border-box */
 *, *::before, *::after {
     box-sizing: border-box;
 }
 ```
 
-**应用场景**:
-- `content-box`: 需要精确控制内容区大小
-- `border-box`: 响应式设计，更直观的尺寸控制
+**布局方式对比**:
+
+```css
+/* 1. 标准文档流 */
+.normal-flow {
+    /* 块级元素：独占一行，可设置宽高 */
+    display: block;
+    width: 100%;
+    height: 50px;
+    margin: 10px 0;
+}
+
+.inline-element {
+    /* 行内元素：不换行，不可设置宽高 */
+    display: inline;
+    /* width和height无效 */
+    padding: 5px 10px; /* 水平padding有效，垂直padding不影响布局 */
+    margin: 0 5px; /* 水平margin有效，垂直margin无效 */
+}
+
+.inline-block {
+    /* 行内块元素：不换行，可设置宽高 */
+    display: inline-block;
+    width: 100px;
+    height: 50px;
+    margin: 5px;
+    vertical-align: top; /* 控制垂直对齐 */
+}
+
+/* 2. 浮动布局 */
+.float-container {
+    /* 清除浮动的几种方法 */
+}
+
+.float-container::after {
+    /* 方法1：伪元素清除浮动 */
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.clearfix {
+    /* 方法2：overflow清除浮动 */
+    overflow: hidden;
+    zoom: 1; /* IE6/7兼容 */
+}
+
+.float-left {
+    float: left;
+    width: 30%;
+    margin-right: 5%;
+}
+
+.float-right {
+    float: right;
+    width: 65%;
+}
+
+/* 3. 定位布局 */
+.relative-container {
+    position: relative;
+    width: 300px;
+    height: 200px;
+    border: 1px solid #ccc;
+}
+
+.absolute-child {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 居中技巧 */
+    width: 100px;
+    height: 50px;
+    background: #f0f0f0;
+}
+
+.fixed-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #333;
+    z-index: 1000;
+}
+
+.sticky-nav {
+    position: sticky;
+    top: 60px; /* 距离顶部60px时开始粘性定位 */
+    background: #fff;
+    border-bottom: 1px solid #eee;
+}
+```
+
+**经典布局实现**:
+
+```css
+/* 圣杯布局 */
+.holy-grail {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.holy-grail-header,
+.holy-grail-footer {
+    flex: none;
+    height: 60px;
+    background: #333;
+    color: white;
+}
+
+.holy-grail-body {
+    flex: 1;
+    display: flex;
+}
+
+.holy-grail-content {
+    flex: 1;
+    padding: 20px;
+    order: 2; /* 内容区域在中间 */
+}
+
+.holy-grail-nav {
+    flex: 0 0 200px;
+    background: #f0f0f0;
+    order: 1; /* 导航在左侧 */
+}
+
+.holy-grail-ads {
+    flex: 0 0 150px;
+    background: #e0e0e0;
+    order: 3; /* 广告在右侧 */
+}
+
+/* 双飞翼布局 */
+.double-wing {
+    width: 100%;
+    float: left;
+}
+
+.double-wing-content {
+    margin: 0 200px 0 150px; /* 为左右侧栏留出空间 */
+    padding: 20px;
+}
+
+.double-wing-left {
+    width: 150px;
+    float: left;
+    margin-left: -100%; /* 移动到最左侧 */
+    background: #f0f0f0;
+}
+
+.double-wing-right {
+    width: 200px;
+    float: left;
+    margin-left: -200px; /* 移动到右侧 */
+    background: #e0e0e0;
+}
+
+/* 等高列布局 */
+.equal-height-container {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.equal-height-column {
+    display: table-cell;
+    vertical-align: top;
+    padding: 20px;
+}
+
+.equal-height-column:nth-child(1) {
+    width: 200px;
+    background: #f0f0f0;
+}
+
+.equal-height-column:nth-child(2) {
+    background: #fff;
+}
+
+.equal-height-column:nth-child(3) {
+    width: 150px;
+    background: #e0e0e0;
+}
+```
 
 ---
 
-#### 2. **[初级]** Flexbox的基本概念和常用属性
+#### 2. **[初级]** Flexbox弹性布局基础
 
-**标签**: Flexbox, 弹性布局, 对齐
+**标签**: Flexbox, 弹性容器, 弹性项目, 对齐方式
 
 **题目描述**:
-请说明Flexbox的基本概念，并介绍主要的属性及其作用。
+请详细说明Flexbox的工作原理，以及常用属性的作用和使用场景。
 
 **核心答案**:
 
-**Flexbox基本概念**:
+**Flexbox基础概念**:
+
 ```css
-.container {
+/* Flexbox容器属性 */
+.flex-container {
     display: flex; /* 或 inline-flex */
     
-    /* 建立主轴和交叉轴 */
-    /* 主轴：flex-direction指定的方向 */
-    /* 交叉轴：垂直于主轴的方向 */
+    /* 主轴方向 */
+    flex-direction: row; /* row | row-reverse | column | column-reverse */
+    
+    /* 换行方式 */
+    flex-wrap: nowrap; /* nowrap | wrap | wrap-reverse */
+    
+    /* 简写：flex-direction + flex-wrap */
+    flex-flow: row wrap;
+    
+    /* 主轴对齐方式 */
+    justify-content: flex-start; /* flex-start | flex-end | center | space-between | space-around | space-evenly */
+    
+    /* 交叉轴对齐方式 */
+    align-items: stretch; /* stretch | flex-start | flex-end | center | baseline */
+    
+    /* 多行交叉轴对齐 */
+    align-content: stretch; /* stretch | flex-start | flex-end | center | space-between | space-around */
+    
+    /* 间距 */
+    gap: 10px; /* 或 row-gap: 10px; column-gap: 15px; */
+}
+
+/* Flexbox项目属性 */
+.flex-item {
+    /* 扩展比例 */
+    flex-grow: 0; /* 默认值，不扩展 */
+    
+    /* 收缩比例 */
+    flex-shrink: 1; /* 默认值，等比收缩 */
+    
+    /* 基础尺寸 */
+    flex-basis: auto; /* auto | 具体值 */
+    
+    /* 简写：flex-grow + flex-shrink + flex-basis */
+    flex: 0 1 auto; /* 默认值 */
+    flex: 1; /* 等同于 flex: 1 1 0% */
+    flex: auto; /* 等同于 flex: 1 1 auto */
+    flex: none; /* 等同于 flex: 0 0 auto */
+    
+    /* 单独对齐 */
+    align-self: auto; /* auto | flex-start | flex-end | center | baseline | stretch */
+    
+    /* 排序 */
+    order: 0; /* 默认值，数值越小越靠前 */
 }
 ```
 
-**容器属性（flex container）**:
-
-1. **flex-direction - 主轴方向**:
-```css
-.container {
-    flex-direction: row;         /* 默认：水平，左到右 */
-    flex-direction: row-reverse; /* 水平，右到左 */
-    flex-direction: column;      /* 垂直，上到下 */
-    flex-direction: column-reverse; /* 垂直，下到上 */
-}
-```
-
-2. **justify-content - 主轴对齐**:
-```css
-.container {
-    justify-content: flex-start;    /* 起点对齐 */
-    justify-content: flex-end;      /* 终点对齐 */
-    justify-content: center;        /* 居中对齐 */
-    justify-content: space-between; /* 两端对齐 */
-    justify-content: space-around;  /* 环绕对齐 */
-    justify-content: space-evenly;  /* 均匀分布 */
-}
-```
-
-3. **align-items - 交叉轴对齐**:
-```css
-.container {
-    align-items: stretch;    /* 默认：拉伸填满 */
-    align-items: flex-start; /* 起点对齐 */
-    align-items: flex-end;   /* 终点对齐 */
-    align-items: center;     /* 居中对齐 */
-    align-items: baseline;   /* 基线对齐 */
-}
-```
-
-**项目属性（flex items）**:
-
-1. **flex-grow - 放大比例**:
-```css
-.item {
-    flex-grow: 0; /* 默认：不放大 */
-    flex-grow: 1; /* 等比例放大 */
-    flex-grow: 2; /* 放大比例为2 */
-}
-```
-
-2. **flex-shrink - 缩小比例**:
-```css
-.item {
-    flex-shrink: 1; /* 默认：等比例缩小 */
-    flex-shrink: 0; /* 不缩小 */
-}
-```
-
-3. **flex-basis - 基准大小**:
-```css
-.item {
-    flex-basis: auto;  /* 默认：项目本来大小 */
-    flex-basis: 200px; /* 固定基准大小 */
-    flex-basis: 30%;   /* 百分比基准大小 */
-}
-```
-
-**实用布局示例**:
+**Flexbox实用布局**:
 
 ```css
-/* 水平居中 */
-.horizontal-center {
-    display: flex;
-    justify-content: center;
-}
-
-/* 垂直居中 */
-.vertical-center {
-    display: flex;
-    align-items: center;
-}
-
-/* 完全居中 */
-.center {
+/* 1. 水平垂直居中 */
+.center-container {
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 100vh;
 }
 
-/* 两端对齐导航 */
+.center-item {
+    width: 200px;
+    height: 100px;
+    background: #f0f0f0;
+}
+
+/* 2. 导航栏布局 */
 .navbar {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    background: #333;
+    color: white;
+}
+
+.navbar-brand {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.navbar-nav {
+    display: flex;
+    list-style: none;
+    margin: 0 0 0 auto; /* 推到右侧 */
+    padding: 0;
+    gap: 20px;
+}
+
+.navbar-nav a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.navbar-nav a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 3. 卡片布局 */
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    flex: 1 1 300px; /* 最小宽度300px，可扩展 */
+    max-width: 400px; /* 最大宽度限制 */
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.card-title {
+    margin: 0 0 10px 0;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.card-description {
+    margin: 0 0 15px 0;
+    color: #666;
+    line-height: 1.5;
+}
+
+.card-actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* 等高列布局 */
-.equal-height {
+/* 4. 侧边栏布局 */
+.sidebar-layout {
     display: flex;
-    /* align-items默认为stretch */
+    min-height: 100vh;
 }
 
-/* 底部对齐 */
-.bottom-align {
+.sidebar {
+    flex: 0 0 250px;
+    background: #f8f9fa;
+    padding: 20px;
+    border-right: 1px solid #dee2e6;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* 5. 底部固定布局 */
+.sticky-footer-layout {
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+.footer {
+    flex: none;
+    background: #333;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+/* 6. 表单布局 */
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.half {
+    flex: 0 0 calc(50% - 7.5px);
+}
+
+.form-group.third {
+    flex: 0 0 calc(33.333% - 10px);
+}
+
+.form-label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* 7. 媒体对象布局 */
+.media {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.media-object {
+    flex: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.media-body {
+    flex: 1;
+}
+
+.media-heading {
+    margin: 0 0 5px 0;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.media-text {
+    margin: 0;
+    color: #666;
+    line-height: 1.4;
+}
+
+.media-meta {
+    margin-top: 5px;
+    font-size: 0.9em;
+    color: #999;
+}
+```
+
+**Flexbox响应式设计**:
+
+```css
+/* 响应式Flexbox布局 */
+.responsive-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+}
+
+.responsive-item {
+    flex: 1 1 300px; /* 基础宽度300px */
+    min-width: 0; /* 防止内容溢出 */
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .responsive-container {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+    
+    .responsive-item {
+        flex: none;
+    }
+    
+    .navbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .navbar-nav {
+        margin: 0;
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .form-group.half,
+    .form-group.third {
+        flex: none;
+    }
+    
+    .sidebar-layout {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        flex: none;
+        order: 2;
+    }
+    
+    .main-content {
+        order: 1;
+    }
+}
+
+/* 平板端适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .responsive-item {
+        flex: 1 1 calc(50% - 10px);
+    }
+    
+    .card {
+        flex: 1 1 calc(50% - 10px);
+    }
+}
+
+/* 桌面端适配 */
+@media (min-width: 1025px) {
+    .responsive-item {
+        flex: 1 1 calc(33.333% - 14px);
+    }
+    
+    .card {
+        flex: 1 1 calc(33.333% - 14px);
+    }
 }
 ```
 
@@ -244,428 +637,518 @@ graph TD
 
 ### 🟡 中级题目
 
-#### 3. **[中级]** Grid布局系统详解
+#### 3. **[中级]** CSS Grid网格布局系统
 
-**标签**: Grid, 二维布局, 网格系统
+**标签**: Grid Layout, 网格容器, 网格项目, 区域命名
 
 **题目描述**:
-请详细说明CSS Grid的特点、基本概念和实际应用场景。
+请详细说明CSS Grid的工作原理，以及如何使用Grid实现复杂的二维布局。
 
 **核心答案**:
 
-**Grid vs Flexbox**:
-
-| 特性 | Grid | Flexbox |
-|------|------|---------|
-| 维度 | 二维（行+列） | 一维（行或列） |
-| 适用场景 | 整体布局 | 组件内部布局 |
-| 对齐控制 | 更精确 | 相对简单 |
-| 浏览器支持 | 较新 | 更广泛 |
-
-**Grid基本概念**:
+**Grid基础概念**:
 
 ```css
-.container {
-    display: grid;
+/* Grid容器属性 */
+.grid-container {
+    display: grid; /* 或 inline-grid */
     
     /* 定义网格轨道 */
-    grid-template-columns: repeat(3, 1fr); /* 3列等宽 */
-    grid-template-rows: 100px auto 100px;  /* 3行 */
+    grid-template-columns: 200px 1fr 100px; /* 固定 自适应 固定 */
+    grid-template-rows: auto 1fr auto; /* 自动 填充 自动 */
+    
+    /* 使用repeat函数 */
+    grid-template-columns: repeat(3, 1fr); /* 三等分 */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 响应式 */
+    grid-template-columns: repeat(auto-fill, 200px); /* 自动填充 */
     
     /* 网格间距 */
-    gap: 20px; /* 行列间距都是20px */
-    grid-row-gap: 10px;    /* 行间距 */
-    grid-column-gap: 15px; /* 列间距 */
+    gap: 20px; /* 或 row-gap: 15px; column-gap: 20px; */
+    
+    /* 对齐方式 */
+    justify-items: stretch; /* start | end | center | stretch */
+    align-items: stretch; /* start | end | center | stretch */
+    justify-content: start; /* start | end | center | stretch | space-around | space-between | space-evenly */
+    align-content: start; /* start | end | center | stretch | space-around | space-between | space-evenly */
+    
+    /* 简写 */
+    place-items: center; /* align-items + justify-items */
+    place-content: center; /* align-content + justify-content */
+}
+
+/* 区域命名 */
+.grid-with-areas {
+    display: grid;
+    grid-template-columns: 200px 1fr 150px;
+    grid-template-rows: 60px 1fr 40px;
+    grid-template-areas: 
+        "header header header"
+        "sidebar main aside"
+        "footer footer footer";
+    gap: 10px;
+    min-height: 100vh;
+}
+
+/* Grid项目属性 */
+.grid-item {
+    /* 基于线的定位 */
+    grid-column-start: 1;
+    grid-column-end: 3;
+    grid-row-start: 2;
+    grid-row-end: 4;
+    
+    /* 简写 */
+    grid-column: 1 / 3; /* 或 1 / span 2 */
+    grid-row: 2 / 4; /* 或 2 / span 2 */
+    grid-area: 2 / 1 / 4 / 3; /* row-start / col-start / row-end / col-end */
+    
+    /* 区域命名 */
+    grid-area: header; /* 使用命名区域 */
+    
+    /* 单独对齐 */
+    justify-self: center; /* start | end | center | stretch */
+    align-self: center; /* start | end | center | stretch */
+    place-self: center; /* align-self + justify-self */
 }
 ```
 
-**网格线命名和引用**:
+**Grid实用布局**:
+
 ```css
-.container {
+/* 1. 经典网站布局 */
+.website-layout {
     display: grid;
-    grid-template-columns: [sidebar-start] 250px [sidebar-end main-start] 1fr [main-end];
-    grid-template-rows: [header-start] 80px [header-end content-start] 1fr [content-end footer-start] 60px [footer-end];
+    grid-template-columns: 200px 1fr 150px;
+    grid-template-rows: 60px 1fr 40px;
+    grid-template-areas: 
+        "header header header"
+        "nav main aside"
+        "footer footer footer";
+    gap: 10px;
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.sidebar {
-    grid-column: sidebar-start / sidebar-end;
-    grid-row: content-start / content-end;
+.header {
+    grid-area: header;
+    background: #333;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.nav {
+    grid-area: nav;
+    background: #f8f9fa;
+    padding: 20px;
 }
 
 .main {
-    grid-column: main-start / main-end;
-    grid-row: content-start / content-end;
-}
-```
-
-**网格区域模板**:
-```css
-.container {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    grid-template-rows: 80px 1fr 60px;
-    grid-template-areas: 
-        "sidebar header"
-        "sidebar main"
-        "sidebar footer";
+    grid-area: main;
+    padding: 20px;
+    overflow-y: auto;
 }
 
-.sidebar { grid-area: sidebar; }
-.header  { grid-area: header; }
-.main    { grid-area: main; }
-.footer  { grid-area: footer; }
-```
+.aside {
+    grid-area: aside;
+    background: #e9ecef;
+    padding: 20px;
+}
 
-**响应式Grid布局**:
-```css
-.responsive-grid {
+.footer {
+    grid-area: footer;
+    background: #6c757d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 2. 响应式卡片网格 */
+.card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
+    padding: 20px;
 }
 
-/* 复杂响应式布局 */
-.complex-layout {
+.card-item {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.card-item:hover {
+    transform: translateY(-5px);
+}
+
+/* 3. 瀑布流布局 */
+.masonry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.masonry-item {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.masonry-item:nth-child(3n+1) {
+    grid-row: span 2;
+}
+
+.masonry-item:nth-child(4n+2) {
+    grid-row: span 3;
+}
+
+/* 4. 复杂表单布局 */
+.form-grid {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    gap: 20px;
+    gap: 15px;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-.item-1 { grid-column: 1 / 5; }   /* 占4列 */
-.item-2 { grid-column: 5 / 9; }   /* 占4列 */  
-.item-3 { grid-column: 9 / 13; }  /* 占4列 */
-
-@media (max-width: 768px) {
-    .item-1, .item-2, .item-3 {
-        grid-column: 1 / 13; /* 全宽 */
-    }
+.form-title {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-bottom: 20px;
 }
-```
 
-**Grid实用功能**:
+.form-group-full {
+    grid-column: 1 / -1;
+}
 
-1. **自动填充网格**:
-```css
-.auto-grid {
+.form-group-half {
+    grid-column: span 6;
+}
+
+.form-group-third {
+    grid-column: span 4;
+}
+
+.form-group-quarter {
+    grid-column: span 3;
+}
+
+.form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* 5. 图片画廊 */
+.gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     grid-auto-rows: 200px;
-}
-```
-
-2. **网格对齐**:
-```css
-.aligned-grid {
-    display: grid;
-    
-    /* 网格容器内对齐 */
-    justify-content: center;  /* 水平对齐网格 */
-    align-content: center;    /* 垂直对齐网格 */
-    
-    /* 网格项目内对齐 */
-    justify-items: center;    /* 项目水平对齐 */
-    align-items: center;      /* 项目垂直对齐 */
+    gap: 10px;
+    padding: 20px;
 }
 
-.item {
-    /* 单独项目对齐 */
-    justify-self: end;
-    align-self: start;
-}
-```
-
----
-
-#### 4. **[中级]** 响应式设计最佳实践
-
-**标签**: 响应式设计, 媒体查询, 移动优先
-
-**题目描述**:
-请说明响应式设计的核心原理和实现方法，包括断点设计和最佳实践。
-
-**核心答案**:
-
-**响应式设计核心原理**:
-
-```mermaid
-graph TD
-    A[响应式设计] --> B[流体网格]
-    A --> C[弹性图片]
-    A --> D[媒体查询]
-    A --> E[移动优先]
-    
-    B --> B1[百分比布局]
-    B --> B2[Flexbox]
-    B --> B3[Grid]
-    
-    C --> C1[max-width: 100%]
-    C --> C2[object-fit]
-    C --> C3[srcset属性]
-    
-    D --> D1[断点设计]
-    D --> D2[条件样式]
-    D --> D3[设备特性]
-    
-    E --> E1[基础样式]
-    E --> E2[渐进增强]
-    E --> E3[性能优化]
-```
-
-**断点设计策略**:
-
-```css
-/* 移动优先的断点设计 */
-:root {
-    --breakpoint-sm: 576px;   /* 小型设备 */
-    --breakpoint-md: 768px;   /* 平板设备 */
-    --breakpoint-lg: 992px;   /* 桌面设备 */
-    --breakpoint-xl: 1200px;  /* 大屏设备 */
-    --breakpoint-xxl: 1400px; /* 超大屏 */
-}
-
-/* 基础样式 - 移动设备 */
-.container {
-    width: 100%;
-    padding: 0 16px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-}
-
-/* 小型设备及以上 */
-@media (min-width: 576px) {
-    .container {
-        max-width: 540px;
-        margin: 0 auto;
-    }
-}
-
-/* 平板设备及以上 */
-@media (min-width: 768px) {
-    .container {
-        max-width: 720px;
-        padding: 0 24px;
-    }
-    
-    .grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 24px;
-    }
-}
-
-/* 桌面设备及以上 */
-@media (min-width: 992px) {
-    .container {
-        max-width: 960px;
-    }
-    
-    .grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 32px;
-    }
-}
-
-/* 大屏设备及以上 */
-@media (min-width: 1200px) {
-    .container {
-        max-width: 1140px;
-    }
-    
-    .grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-```
-
-**弹性图片和媒体**:
-
-```css
-/* 基础响应式图片 */
-img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* 使用object-fit控制图片显示 */
-.image-container {
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
-}
-
-.image-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;     /* 保持比例，裁剪超出部分 */
-    object-fit: contain;   /* 保持比例，完整显示 */
-    object-fit: fill;      /* 拉伸填满容器 */
-    object-position: center; /* 定位焦点 */
-}
-
-/* 响应式视频 */
-.video-container {
+.gallery-item {
     position: relative;
-    width: 100%;
-    padding-bottom: 56.25%; /* 16:9比例 */
-    height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
-.video-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
+.gallery-item img {
     width: 100%;
     height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.1);
+}
+
+/* 特殊尺寸项目 */
+.gallery-item.large {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.gallery-item.wide {
+    grid-column: span 2;
+}
+
+.gallery-item.tall {
+    grid-row: span 2;
+}
+
+/* 6. 仪表板布局 */
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: 15px;
+    height: 100vh;
+    padding: 15px;
+}
+
+.widget {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.widget-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 0;
+}
+
+.widget-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 不同尺寸的小部件 */
+.widget-small {
+    grid-column: span 3;
+    grid-row: span 2;
+}
+
+.widget-medium {
+    grid-column: span 4;
+    grid-row: span 3;
+}
+
+.widget-large {
+    grid-column: span 6;
+    grid-row: span 4;
+}
+
+.widget-wide {
+    grid-column: span 8;
+    grid-row: span 2;
+}
+
+.widget-tall {
+    grid-column: span 3;
+    grid-row: span 6;
 }
 ```
 
-**高级媒体查询技巧**:
+**Grid响应式设计**:
 
 ```css
-/* 设备方向 */
-@media (orientation: landscape) {
-    .landscape-only { display: block; }
+/* 响应式Grid布局 */
+.responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
 }
 
-@media (orientation: portrait) {
-    .portrait-only { display: block; }
-}
-
-/* 设备像素密度 */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .high-dpi-image {
-        background-image: url('image@2x.png');
-        background-size: 100% 100%;
-    }
-}
-
-/* 用户偏好 */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-color: #1a1a1a;
-        --text-color: #ffffff;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* 悬停支持检测 */
-@media (hover: hover) {
-    .hover-effect:hover {
-        transform: scale(1.05);
-    }
-}
-
-@media (hover: none) {
-    .touch-alternative {
-        display: block;
-    }
-}
-```
-
-**容器查询（Container Queries）**:
-
-```css
-/* 现代CSS的容器查询 */
-.card-container {
-    container-type: inline-size;
-    container-name: card;
-}
-
-@container card (min-width: 300px) {
-    .card {
-        display: flex;
-        flex-direction: row;
-    }
-}
-
-@container card (min-width: 500px) {
-    .card {
-        padding: 2rem;
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .website-layout {
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+            "header"
+            "main"
+            "nav"
+            "aside"
+            "footer";
     }
     
-    .card-image {
-        flex: 1;
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 15px;
     }
     
-    .card-content {
-        flex: 2;
+    .form-group-half,
+    .form-group-third,
+    .form-group-quarter {
+        grid-column: 1 / -1;
+    }
+    
+    .dashboard {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        height: auto;
+    }
+    
+    .widget-small,
+    .widget-medium,
+    .widget-large,
+    .widget-wide,
+    .widget-tall {
+        grid-column: 1 / -1;
+        grid-row: auto;
+    }
+    
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-auto-rows: 150px;
+        gap: 5px;
+    }
+    
+    .gallery-item.large,
+    .gallery-item.wide,
+    .gallery-item.tall {
+        grid-column: span 1;
+        grid-row: span 1;
+    }
+}
+
+/* 平板端适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .website-layout {
+        grid-template-columns: 150px 1fr;
+        grid-template-areas: 
+            "header header"
+            "nav main"
+            "footer footer";
+    }
+    
+    .aside {
+        display: none;
+    }
+    
+    .dashboard {
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(6, 1fr);
+    }
+    
+    .widget-large {
+        grid-column: span 4;
+        grid-row: span 3;
+    }
+    
+    .widget-wide {
+        grid-column: span 6;
+        grid-row: span 2;
+    }
+}
+
+/* 大屏幕适配 */
+@media (min-width: 1400px) {
+    .responsive-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    
+    .card-grid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+    
+    .website-layout {
+        grid-template-columns: 250px 1fr 200px;
     }
 }
 ```
 
-**响应式字体**:
+**Grid高级技巧**:
 
-```css
-/* 流体字体大小 */
-h1 {
-    font-size: clamp(1.5rem, 4vw, 3rem);
-    /* 最小1.5rem，最大3rem，中间根据视口宽度调整 */
+```javascript
+// Grid动态布局控制
+class GridLayoutManager {
+    constructor(container) {
+        this.container = container;
+        this.items = [...container.children];
+        this.setupResponsiveGrid();
+        this.setupResizeObserver();
+    }
+    
+    setupResponsiveGrid() {
+        const updateGrid = () => {
+            const containerWidth = this.container.offsetWidth;
+            const itemMinWidth = 250;
+            const gap = 20;
+            
+            // 计算列数
+            const columns = Math.floor((containerWidth + gap) / (itemMinWidth + gap));
+            
+            // 更新CSS自定义属性
+            this.container.style.setProperty('--grid-columns', columns);
+            this.container.style.setProperty('--grid-gap', `${gap}px`);
+        };
+        
+        updateGrid();
+        window.addEventListener('resize', updateGrid);
+    }
+    
+    setupResizeObserver() {
+        if ('ResizeObserver' in window) {
+            const resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    this.updateItemLayout(entry.target);
+                }
+            });
+            
+            this.items.forEach(item => {
+                resizeObserver.observe(item);
+            });
+        }
+    }
+    
+    updateItemLayout(item) {
+        const height = item.scrollHeight;
+        const baseRowHeight = 200;
+        const gap = 20;
+        const rowSpan = Math.ceil((height + gap) / (baseRowHeight + gap));
+        
+        item.style.gridRowEnd = `span ${rowSpan}`;
+    }
+    
+    addItem(element) {
+        this.container.appendChild(element);
+        this.items.push(element);
+        this.updateItemLayout(element);
+    }
+    
+    removeItem(element) {
+        const index = this.items.indexOf(element);
+        if (index > -1) {
+            this.items.splice(index, 1);
+            element.remove();
+        }
+    }
 }
 
-/* 基于容器的字体缩放 */
-.text-content {
-    font-size: calc(1rem + 0.5vw);
-    line-height: calc(1.4 + 0.2vw);
-}
-
-/* 响应式字体系统 */
-:root {
-    --font-size-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
-    --font-size-base: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
-    --font-size-lg: clamp(1.25rem, 1.1rem + 0.75vw, 1.75rem);
-    --font-size-xl: clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem);
-}
+// 使用示例
+const gridManager = new GridLayoutManager(document.querySelector('.dynamic-grid'));
 ```
-
-**性能优化**:
-
-```css
-/* 关键CSS内联 */
-/* 首屏关键样式应该内联在HTML中 */
-
-/* 非关键CSS异步加载 */
-/* <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'"> */
-
-/* 条件加载样式 */
-@media (min-width: 992px) {
-    @import url('desktop-only.css');
-}
-
-/* 减少重绘和回流 */
-.optimized-animation {
-    will-change: transform;
-    transform: translateZ(0); /* 触发硬件加速 */
-}
-```
-
-**最佳实践总结**:
-- ✅ 移动优先设计
-- ✅ 渐进增强而非优雅降级
-- ✅ 使用相对单位（rem, em, vw, vh）
-- ✅ 测试真实设备而非仅仅浏览器开发工具
-- ✅ 考虑性能，避免过度复杂的响应式逻辑
-- ✅ 关注可访问性和用户体验
 
 ---
 
 ## 🔗 相关链接
 
 - [← 返回前端题库](./README.md)
+- [HTML语义化](./html-semantics.md)
 - [JavaScript核心概念](./javascript-core.md)
-- [React基础概念](./react-basics.md)
-- [性能优化指南](./performance-optimization.md)
+- [响应式设计](./responsive-design.md)
 
 ---
 
-*现代CSS布局功能强大，建议在实际项目中多加练习以熟练掌握* 
+*CSS布局是前端开发的核心技能，掌握现代布局技术能够高效实现各种复杂的页面结构* 
