@@ -80,7 +80,7 @@ IQB/
 - 微服务架构
 
 ### 技术栈专题
-- **前端**：JavaScript, React, Vue, HTML/CSS
+- **前端**：[JavaScript核心概念](./questions/frontend/javascript-core.md), [React生态](./questions/frontend/react-basics.md), [CSS布局设计](./questions/frontend/css-layout.md), [性能优化](./questions/frontend/performance-optimization.md)
 - **后端**：Java, Python, Go, Node.js
 - **数据库**：SQL, NoSQL, 数据库优化
 - **云服务**：AWS, Azure, GCP
