@@ -1,0 +1,289 @@
+# IQB (Interview Question Bank) - .gitignore
+
+# ===================================
+# 操作系统生成的文件
+# ===================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===================================
+# 编辑器和IDE
+# ===================================
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Cursor
+.cursor/
+
+# JetBrains IDEs
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ===================================
+# 文档和笔记工具
+# ===================================
+
+# Obsidian
+.obsidian/
+
+# Notion
+.notion/
+
+# Typora
+.typora/
+
+# ===================================
+# 开发工具和依赖
+# ===================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+.pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Java
+*.class
+*.log
+*.ctxt
+.mtj.tmp/
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+
+# ===================================
+# 临时文件和缓存
+# ===================================
+
+# 通用临时文件
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+*.log
+*.cache
+
+# 压缩文件
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# ===================================
+# 版本控制
+# ===================================
+
+# Git
+.git/
+*.patch
+*.diff
+
+# SVN
+.svn/
+
+# ===================================
+# 构建和部署
+# ===================================
+
+# 构建输出
+build/
+dist/
+out/
+target/
+
+# Docker
+.dockerignore
+Dockerfile.local
+docker-compose.override.yml
+
+# ===================================
+# 配置和密钥
+# ===================================
+
+# 环境变量
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 配置文件
+config.local.*
+*.config.local
+.secrets
+
+# SSH密钥
+*.pem
+*.key
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+
+# ===================================
+# 数据库
+# ===================================
+
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# ===================================
+# 日志和监控
+# ===================================
+
+# 日志文件
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===================================
+# 测试覆盖率
+# ===================================
+
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output
+
+# ===================================
+# 项目特定
+# ===================================
+
+# 草稿和待办
+drafts/
+todo.md
+TODO.md
+notes.md
+NOTES.md
+
+# 个人笔记
+personal/
+private/
+.personal/
+.private/
+
+# 生成的文档
+generated/
+auto-generated/
+
+# 统计和分析
+stats/
+analytics/
+
+# ===================================
+# 其他
+# ===================================
+
+# 锁文件（根据项目需要选择保留或忽略）
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# 依赖目录
+vendor/
+third_party/
+
+# 本地开发工具
+.local/
+.tools/ 
