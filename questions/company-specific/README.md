@@ -10,27 +10,27 @@
 - [汇丰银行 (HSBC)](./hsbc/README.md) ✅
 - [渣打银行 (Standard Chartered)](./standard-chartered/README.md) ✅
 - [摩根大通 (JPMorgan Chase)](./jpmorgan/README.md) ✅
-- [花旗银行 (Citibank)](./citibank/README.md)
-- [高盛 (Goldman Sachs)](./goldman-sachs/README.md)
+- [花旗银行 (Citibank)](./citibank/README.md) ✅
+- [高盛 (Goldman Sachs)](./goldman-sachs/README.md) ✅
 - [摩根士丹利 (Morgan Stanley)](./morgan-stanley/README.md)
 - [德意志银行 (Deutsche Bank)](./deutsche-bank/README.md)
 - [瑞银 (UBS)](./ubs/README.md)
 - [巴克莱银行 (Barclays)](./barclays/README.md)
 
 ### 科技巨头
-- [Google](./google/README.md)
-- [微软 (Microsoft)](./microsoft/README.md)
+- [Google](./google/README.md) ✅
+- [微软 (Microsoft)](./microsoft/README.md) ✅
 - [亚马逊 (Amazon)](./amazon/README.md)
 - [Meta (Facebook)](./meta/README.md)
 
 ### 互联网公司
-- [阿里巴巴](./alibaba/README.md)
-- [腾讯](./tencent/README.md)
+- [阿里巴巴](./alibaba/README.md) ✅
+- [腾讯](./tencent/README.md) ✅
 - [字节跳动](./bytedance/README.md)
 - [美团](./meituan/README.md)
 
 ### 咨询公司
-- [麦肯锡 (McKinsey)](./mckinsey/README.md)
+- [麦肯锡 (McKinsey)](./mckinsey/README.md) ✅
 - [波士顿咨询 (BCG)](./bcg/README.md)
 - [贝恩咨询 (Bain)](./bain/README.md)
 
