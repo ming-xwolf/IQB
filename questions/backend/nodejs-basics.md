@@ -1,340 +1,240 @@
-# Node.js 基础面试题
+# Node.js基础面试题
 
 [← 返回后端面试题目录](./README.md)
 
-## 🎯 核心知识点
+## 📚 题目概览
 
-- Event Loop (事件循环)
-- 模块系统 (CommonJS/ES Modules)
-- 异步编程模型
-- Stream API
-- Buffer 处理
-- 进程和子进程
-- 错误处理
+Node.js是基于Chrome V8引擎的JavaScript运行时环境，以其事件驱动、非阻塞I/O模型著称。本章节重点考察候选人对Node.js核心概念的理解，包括事件循环、模块系统、异步编程等关键技术，以及在实际项目中的应用能力。
 
-## 📊 Node.js 架构概览
+## 🎯 核心技术考察重点
+
+### 事件循环与异步编程
+- Event Loop的工作机制和各个阶段
+- 微任务和宏任务的执行优先级
+- process.nextTick()和setImmediate()的区别
+- 异步编程模式和最佳实践
+
+### 模块系统与包管理
+- CommonJS和ES Modules的对比
+- 模块加载机制和缓存策略
+- NPM包管理和依赖解析
+- 模块打包和优化策略
+
+### Stream与Buffer处理
+- 四种Stream类型的使用场景
+- 背压处理和流量控制
+- Buffer的内存管理和性能优化
+- 大文件处理的最佳实践
+
+### 性能优化与监控
+- CPU密集型任务的处理策略
+- 内存管理和垃圾回收机制
+- 性能监控和调试技巧
+- 集群模式和负载均衡
+
+## 📊 知识结构关联图
 
 ```mermaid
 graph TB
-    A[应用层] --> B[Node.js API]
-    B --> C[V8 JavaScript引擎]
-    B --> D[libuv]
-    D --> E[Thread Pool]
-    D --> F[Event Loop]
-    F --> G[Event Queue]
-    
-    subgraph "核心组件"
-        C
-        D
+    subgraph "Node.js核心架构"
+        A[V8引擎] --> B[JavaScript执行]
+        C[libuv] --> D[事件循环]
+        C --> E[线程池]
+        C --> F[异步I/O]
     end
     
-    subgraph "异步I/O处理"
-        E
-        F
-        G
+    subgraph "编程模型"
+        G[事件驱动] --> H[回调函数]
+        G --> I[Promise/async-await]
+        G --> J[Stream处理]
+        G --> K[EventEmitter]
     end
-```
-
-## 💡 面试题目
-
-### **初级题目**
-
-#### 1. 什么是Node.js？它的主要特点是什么？
-
-**答案要点：**
-- Node.js是基于Chrome V8引擎的JavaScript运行时环境
-- 主要特点：
-  - 事件驱动、非阻塞I/O模型
-  - 单线程（主线程）+ 线程池
-  - 跨平台
-  - NPM生态系统丰富
-  - 适合I/O密集型应用
-
-#### 2. Node.js中的模块系统是如何工作的？
-
-**答案要点：**
-- CommonJS模块系统
-- `require()` 和 `module.exports`
-- 模块缓存机制
-- 内置模块、本地模块、第三方模块
-
-```javascript
-// 导出模块
-module.exports = {
-    add: (a, b) => a + b,
-    subtract: (a, b) => a - b
-};
-
-// 导入模块
-const math = require('./math');
-console.log(math.add(2, 3)); // 5
-```
-
-#### 3. Event Loop（事件循环）的工作原理是什么？
-
-**答案要点：**
-- 单线程主循环
-- 事件循环阶段：
-  1. Timer（定时器）
-  2. Pending callbacks
-  3. Idle, prepare
-  4. Poll（轮询）
-  5. Check（检查）
-  6. Close callbacks
-
-```mermaid
-graph LR
-    A[Timer] --> B[Pending Callbacks]
-    B --> C[Idle, Prepare]
-    C --> D[Poll]
-    D --> E[Check]
-    E --> F[Close Callbacks]
-    F --> A
-```
-
-### **中级题目**
-
-#### 4. 解释 process.nextTick() 和 setImmediate() 的区别
-
-**答案要点：**
-- `process.nextTick()`: 在当前阶段结束后立即执行
-- `setImmediate()`: 在check阶段执行
-- 执行优先级：process.nextTick > Promise.resolve > setImmediate
-
-```javascript
-console.log('start');
-
-setImmediate(() => console.log('setImmediate'));
-process.nextTick(() => console.log('nextTick'));
-Promise.resolve().then(() => console.log('promise'));
-
-console.log('end');
-
-// 输出顺序：start -> end -> nextTick -> promise -> setImmediate
-```
-
-#### 5. Node.js中的Stream是什么？有哪些类型？
-
-**答案要点：**
-- Stream是处理数据流的抽象接口
-- 四种类型：
-  - Readable（可读流）
-  - Writable（可写流）
-  - Duplex（双工流）
-  - Transform（转换流）
-
-```javascript
-const fs = require('fs');
-const readStream = fs.createReadStream('input.txt');
-const writeStream = fs.createWriteStream('output.txt');
-
-readStream.pipe(writeStream);
-```
-
-#### 6. Buffer在Node.js中的作用是什么？
-
-**答案要点：**
-- 处理二进制数据
-- 固定大小的内存分配
-- 与字符串转换
-- 性能优化
-
-```javascript
-// 创建Buffer
-const buf1 = Buffer.alloc(10);
-const buf2 = Buffer.from('hello world', 'utf8');
-
-// Buffer操作
-console.log(buf2.toString()); // 'hello world'
-console.log(buf2.length); // 11
-```
-
-### **高级题目**
-
-#### 7. 如何在Node.js中处理CPU密集型任务？
-
-**答案要点：**
-- 使用Worker Threads
-- 子进程 (child_process)
-- 集群模式 (cluster)
-- 任务分解和异步处理
-
-```javascript
-// 使用Worker Threads
-const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
-
-if (isMainThread) {
-    const worker = new Worker(__filename, { workerData: { num: 40 } });
-    worker.on('message', (result) => {
-        console.log('Fibonacci result:', result);
-    });
-} else {
-    function fibonacci(n) {
-        if (n < 2) return n;
-        return fibonacci(n - 1) + fibonacci(n - 2);
-    }
     
-    const result = fibonacci(workerData.num);
-    parentPort.postMessage(result);
-}
-```
-
-#### 8. 解释Node.js中的内存管理和垃圾回收
-
-**答案要点：**
-- V8内存结构：新生代、老生代
-- 垃圾回收算法：Scavenge、Mark-Sweep、Mark-Compact
-- 内存泄漏检测和预防
-- `--max-old-space-size` 参数
-
-#### 9. 如何优化Node.js应用的性能？
-
-**答案要点：**
-- 代码优化：
-  - 使用异步操作
-  - 避免阻塞主线程
-  - 合理使用缓存
-- 内存优化：
-  - 避免内存泄漏
-  - 使用对象池
-- I/O优化：
-  - 连接池
-  - 批量操作
-- 监控和分析：
-  - Profile工具
-  - APM监控
-
-### **实战题目**
-
-#### 10. 实现一个简单的HTTP服务器和客户端
-
-```javascript
-// 服务器端
-const http = require('http');
-
-const server = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ message: 'Hello World', timestamp: Date.now() }));
-});
-
-server.listen(3000, () => {
-    console.log('Server running on port 3000');
-});
-
-// 客户端
-const options = {
-    hostname: 'localhost',
-    port: 3000,
-    path: '/',
-    method: 'GET'
-};
-
-const req = http.request(options, (res) => {
-    let data = '';
-    res.on('data', (chunk) => data += chunk);
-    res.on('end', () => console.log(JSON.parse(data)));
-});
-
-req.end();
-```
-
-#### 11. 实现一个文件上传处理器
-
-```javascript
-const fs = require('fs');
-const path = require('path');
-const { promisify } = require('util');
-
-class FileUploader {
-    constructor(uploadDir = './uploads') {
-        this.uploadDir = uploadDir;
-        this.ensureDir();
-    }
+    subgraph "模块生态"
+        L[CommonJS] --> M[require/exports]
+        N[ES Modules] --> O[import/export]
+        P[NPM] --> Q[包管理]
+        P --> R[依赖解析]
+    end
     
-    ensureDir() {
-        if (!fs.existsSync(this.uploadDir)) {
-            fs.mkdirSync(this.uploadDir, { recursive: true });
-        }
-    }
+    subgraph "性能优化"
+        S[Worker Threads]
+        T[Cluster模式]
+        U[内存管理]
+        V[性能监控]
+    end
     
-    async saveFile(filename, data) {
-        const filepath = path.join(this.uploadDir, filename);
-        const writeFile = promisify(fs.writeFile);
-        
-        try {
-            await writeFile(filepath, data);
-            return { success: true, path: filepath };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
+    A --> G
+    C --> G
+    L --> S
+    N --> S
     
-    async processUpload(req) {
-        return new Promise((resolve, reject) => {
-            let data = Buffer.alloc(0);
-            
-            req.on('data', chunk => {
-                data = Buffer.concat([data, chunk]);
-            });
-            
-            req.on('end', async () => {
-                const filename = `upload_${Date.now()}.bin`;
-                const result = await this.saveFile(filename, data);
-                resolve(result);
-            });
-            
-            req.on('error', reject);
-        });
-    }
-}
+    style A fill:#e1f5fe
+    style C fill:#f3e5f5
+    style G fill:#e8f5e8
+    style P fill:#fff3e0
 ```
 
-## 🔗 扩展学习
+## 📝 核心面试题目
 
-### Node.js生态系统
+### Event Loop与异步机制 🔄
 
-```mermaid
-mindmap
-  root((Node.js生态))
-    框架
-      Express
-      Koa
-      Fastify
-      NestJS
-    工具
-      npm/yarn
-      nodemon
-      PM2
-      webpack
-    数据库
-      MongoDB
-      PostgreSQL
-      Redis
-      MySQL
-    测试
-      Jest
-      Mocha
-      Chai
-      Supertest
-```
+#### 题目1：Event Loop工作原理深度解析
+**问题背景**：理解Node.js单线程如何处理高并发请求的核心机制
 
-### 相关主题
-- [Express 框架面试题](./nodejs-express.md)
-- [Node.js 性能优化](./nodejs-performance.md)
-- [异步编程面试题](./python-async.md)
-- [Web安全面试题](./web-security.md)
+**技术挑战**：
+- Event Loop各个阶段的执行顺序和特点
+- 微任务队列和宏任务队列的优先级
+- 不同异步操作的调度策略
+- 性能瓶颈的识别和优化
 
-## 📚 推荐资源
+**考察要点**：
+- 对事件循环六个阶段的深度理解
+- process.nextTick()和Promise的执行时机
+- Timer、I/O、Check阶段的调度机制
+- 如何避免事件循环阻塞
 
-### 官方文档
-- [Node.js 官方文档](https://nodejs.org/docs/)
-- [NPM 文档](https://docs.npmjs.com/)
+**📁 完整解决方案**：[Event Loop机制详解](../../solutions/common/nodejs-event-loop.md)
 
-### 学习材料
-- 《深入浅出Node.js》
-- 《Node.js设计模式》
-- [Node.js最佳实践](https://github.com/goldbergyoni/nodebestpractices)
+#### 题目2：异步编程模式最佳实践
+**问题背景**：在复杂业务场景中选择合适的异步编程模式
+
+**技术挑战**：
+- 回调地狱的解决方案
+- Promise链式调用的优化
+- async/await的错误处理
+- 并发控制和流量管理
+
+**考察要点**：
+- 不同异步模式的适用场景
+- 错误处理的最佳实践
+- 性能和可读性的权衡
+- 异步操作的测试策略
+
+**📁 完整解决方案**：[Node.js异步编程实践](../../solutions/common/nodejs-async-patterns.md)
+
+### 模块系统与生态 📦
+
+#### 题目3：模块系统设计与优化
+**问题背景**：设计可维护、高性能的模块架构
+
+**技术挑战**：
+- CommonJS与ES Modules的混用
+- 模块循环依赖的处理
+- 动态导入和代码分割
+- 模块缓存和热重载
+
+**考察要点**：
+- 模块加载机制的深度理解
+- 依赖管理的最佳实践
+- 性能优化策略
+- 模块化架构设计
+
+**📁 完整解决方案**：[Node.js模块系统实现](../../solutions/common/nodejs-module-system.md)
+
+### Stream与数据处理 🌊
+
+#### 题目4：高性能Stream处理系统
+**问题背景**：处理大量数据流时的性能优化和内存管理
+
+**技术挑战**：
+- 背压处理和流量控制
+- Transform流的自定义实现
+- 多个流的组合和管道设计
+- 错误处理和恢复机制
+
+**考察要点**：
+- 四种Stream类型的深度应用
+- 内存效率和性能优化
+- 错误传播和处理策略
+- 与其他I/O操作的集成
+
+**📁 完整解决方案**：[Node.js Stream处理系统](../../solutions/common/nodejs-stream-processing.md)
+
+### 性能优化与监控 ⚡
+
+#### 题目5：CPU密集型任务处理策略
+**问题背景**：在Node.js中高效处理计算密集型任务
+
+**技术挑战**：
+- Worker Threads的设计和使用
+- 子进程通信和数据传递
+- 任务分解和负载均衡
+- 资源管理和监控
+
+**考察要点**：
+- 多线程编程的最佳实践
+- 进程间通信的设计
+- 性能监控和调优
+- 内存和CPU资源管理
+
+**📁 完整解决方案**：[Node.js多线程处理实现](../../solutions/common/nodejs-worker-threads.md)
+
+#### 题目6：内存管理与性能监控
+**问题背景**：构建生产级的性能监控和内存管理系统
+
+**技术挑战**：
+- V8垃圾回收机制的优化
+- 内存泄漏的检测和预防
+- 性能指标的收集和分析
+- 实时监控和告警系统
+
+**考察要点**：
+- V8内存模型的深度理解
+- 性能调优的系统性方法
+- 监控工具的使用和开发
+- 生产环境的最佳实践
+
+**📁 完整解决方案**：[Node.js性能监控系统](../../solutions/common/nodejs-performance-monitoring.md)
+
+## 📊 面试评分标准
+
+### 基础理解 (30分)
+- **概念掌握**：能清晰解释Node.js的核心概念和工作原理
+- **API熟悉**：熟练使用Node.js的核心API和模块
+- **最佳实践**：了解社区推荐的编程规范和模式
+
+### 实践应用 (40分)
+- **问题解决**：能够识别和解决常见的Node.js开发问题
+- **性能优化**：具备性能分析和优化的实战能力
+- **架构设计**：能够设计可扩展的Node.js应用架构
+
+### 深度理解 (30分)
+- **原理洞察**：深入理解底层机制和实现原理
+- **生产经验**：具备生产环境的部署和运维经验
+- **技术前瞻**：了解Node.js的发展趋势和新特性
+
+## 🎯 备考建议
+
+### 学习路径
+1. **基础概念**：深入理解事件循环、模块系统等核心概念
+2. **API实践**：熟练掌握Stream、Buffer、Process等核心API
+3. **异步编程**：掌握各种异步编程模式和最佳实践
+4. **性能优化**：学习性能分析工具和优化技巧
+5. **生产实践**：通过实际项目积累部署和运维经验
+
+### 技术重点
+- **Event Loop**：深度理解事件循环机制
+- **Stream API**：掌握流式数据处理
+- **Worker Threads**：了解多线程编程
+- **性能监控**：学习APM工具的使用
+- **模块化**：掌握现代模块化开发
+
+### 实践项目建议
+- 构建高性能Web服务器
+- 实现文件处理工具
+- 开发实时通信应用
+- 搭建微服务架构
+- 创建性能监控系统
+
+## 🔗 相关资源链接
+
+- [Node.js Express框架面试题](./nodejs-express.md)
+- [Node.js性能优化面试题](./nodejs-performance.md)
+- [JavaScript核心面试题](../frontend/javascript-core.md)
+- [微服务架构面试题](./microservices.md)
+- [← 返回后端面试题目录](./README.md)
 
 ---
 
-*掌握Node.js核心概念，构建高性能后端应用* 🚀 
+*掌握Node.js核心技术，构建高性能JavaScript服务端应用* 🚀 

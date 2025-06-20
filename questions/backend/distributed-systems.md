@@ -1,708 +1,234 @@
 # 分布式系统架构面试题
 
-## 🏷️ 标签
-- 技术栈: 分布式系统, 架构设计, 微服务
-- 难度: 中级到高级
-- 类型: 架构题, 原理题, 场景题
+[← 返回后端面试题目录](./README.md)
 
-## 📋 题目描述
+## 📚 题目概览
 
-本文包含分布式系统架构相关的面试题，涵盖CAP理论、一致性、可用性、分区容错性、分布式事务、负载均衡等核心概念。
+分布式系统是现代大规模应用的基础架构，直接关系到系统的可扩展性、可用性和一致性。本章节重点考察候选人对分布式系统核心理论的深度理解，包括CAP定理、一致性协议、分布式事务等关键概念，以及在复杂业务场景中的架构设计和实现能力。
 
-## 💡 核心知识点
-- CAP 理论和 BASE 理论
-- 分布式一致性协议 (Raft, Paxos)
-- 分布式事务 (2PC, 3PC, TCC, Saga)
-- 分布式锁和选举算法
-- 负载均衡和服务发现
-- 数据分片和复制
+## 🎯 核心技术考察重点
 
-## 📊 分布式系统核心架构
+### 分布式系统理论基础
+- CAP定理和BASE理论的深度理解
+- 分布式系统的核心挑战和解决思路
+- 一致性、可用性、分区容错的权衡策略
+- 分布式系统的设计原则和模式
+
+### 一致性协议与算法
+- Raft、Paxos等一致性算法的原理
+- 分布式锁的实现机制和应用场景
+- 选举算法和故障检测机制
+- 分布式时钟和事件顺序
+
+### 分布式事务处理
+- 两阶段提交(2PC)和三阶段提交(3PC)
+- TCC、Saga等事务模式的应用
+- 分布式事务的性能优化策略
+- 最终一致性的实现机制
+
+### 系统架构设计
+- 负载均衡和服务发现机制
+- 数据分片和复制策略
+- 分布式缓存和存储系统
+- 容错设计和故障恢复
+
+## 📊 知识结构关联图
 
 ```mermaid
 graph TB
-    Client[客户端] --> Gateway[API网关]
-    Gateway --> LB[负载均衡器]
-    
-    LB --> Service1[服务A]
-    LB --> Service2[服务B] 
-    LB --> Service3[服务C]
-    
-    Service1 --> DB1[(主数据库)]
-    Service2 --> DB2[(从数据库)]
-    Service3 --> Cache[缓存集群]
-    
-    DB1 --> DB2
-    
-    subgraph "服务注册发现"
-        Registry[注册中心]
-        Service1 -.-> Registry
-        Service2 -.-> Registry
-        Service3 -.-> Registry
+    subgraph "分布式系统核心"
+        A[分布式系统] --> B[理论基础]
+        A --> C[一致性协议]
+        A --> D[事务处理]
+        A --> E[架构设计]
     end
     
-    subgraph "消息系统"
-        MQ[消息队列]
-        Service1 --> MQ
-        Service2 --> MQ
-        Service3 --> MQ
+    subgraph "理论基础"
+        B --> F[CAP定理]
+        B --> G[BASE理论]
+        B --> H[FLP不可能性]
+        B --> I[拜占庭问题]
     end
     
-    subgraph "监控系统"
-        Monitor[监控中心]
-        Service1 -.-> Monitor
-        Service2 -.-> Monitor
-        Service3 -.-> Monitor
+    subgraph "一致性算法"
+        C --> J[Raft算法]
+        C --> K[Paxos算法]
+        C --> L[分布式锁]
+        C --> M[选举算法]
     end
-```
-
-## 📝 面试题目
-
-### 1. CAP 理论深度解析
-
-#### **【高级】** 请详细解释 CAP 理论，并举例说明在实际项目中如何进行权衡？
-
-**💡 考察要点:**
-- CAP 理论的准确理解
-- 实际系统中的权衡策略
-- 不同场景下的选择
-
-**📝 参考答案:**
-
-**CAP 理论核心内容:**
-
-```mermaid
-graph TD
-    CAP[CAP理论] --> C[一致性 Consistency]
-    CAP --> A[可用性 Availability]
-    CAP --> P[分区容错性 Partition Tolerance]
     
-    C --> C1[强一致性]
-    C --> C2[弱一致性]
-    C --> C3[最终一致性]
+    subgraph "事务模式"
+        D --> N[2PC/3PC]
+        D --> O[TCC模式]
+        D --> P[Saga模式]
+        D --> Q[最终一致性]
+    end
     
-    A --> A1[高可用性 99.9%]
-    A --> A2[容错能力]
-    A --> A3[故障恢复]
-    
-    P --> P1[网络分区]
-    P --> P2[节点故障]
-    P --> P3[数据中心隔离]
-    
-    subgraph "权衡选择"
-        CP[CP: 一致性+分区容错<br/>放弃可用性]
-        AP[AP: 可用性+分区容错<br/>放弃强一致性]
-        CA[CA: 一致性+可用性<br/>放弃分区容错<br/>(单体系统)]
+    subgraph "架构组件"
+        E --> R[负载均衡]
+        E --> S[服务发现]
+        E --> T[数据分片]
+        E --> U[故障恢复]
     end
 ```
 
-**实际案例分析:**
+## 📝 核心面试题目
 
-```java
-// 1. CP系统示例 - 分布式锁实现
-public class DistributedLockExample {
-    private final ZooKeeper zooKeeper;
-    private final String lockPath = "/distributed-locks";
-    
-    public boolean acquireLock(String resourceId, long timeoutMs) {
-        String lockNode = lockPath + "/" + resourceId;
-        try {
-            // 创建临时顺序节点
-            String createdPath = zooKeeper.create(
-                lockNode + "-", 
-                new byte[0], 
-                ZooDefs.Ids.OPEN_ACL_UNSAFE,
-                CreateMode.EPHEMERAL_SEQUENTIAL
-            );
-            
-            // 检查是否是最小节点
-            List<String> children = zooKeeper.getChildren(lockPath, false);
-            Collections.sort(children);
-            
-            String minNode = children.get(0);
-            String currentNode = createdPath.substring(createdPath.lastIndexOf('/') + 1);
-            
-            if (minNode.equals(currentNode)) {
-                return true; // 获得锁
-            } else {
-                // 监听前一个节点
-                String prevNode = null;
-                for (int i = 0; i < children.size(); i++) {
-                    if (children.get(i).equals(currentNode)) {
-                        prevNode = children.get(i - 1);
-                        break;
-                    }
-                }
-                
-                if (prevNode != null) {
-                    CountDownLatch latch = new CountDownLatch(1);
-                    Stat stat = zooKeeper.exists(lockPath + "/" + prevNode, event -> {
-                        if (event.getType() == Watcher.Event.EventType.NodeDeleted) {
-                            latch.countDown();
-                        }
-                    });
-                    
-                    if (stat == null) {
-                        return acquireLock(resourceId, timeoutMs); // 递归重试
-                    }
-                    
-                    return latch.await(timeoutMs, TimeUnit.MILLISECONDS);
-                }
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-}
+### 分布式系统理论 📚
 
-// 2. AP系统示例 - 最终一致性
-public class EventualConsistencyExample {
-    private final List<DataNode> dataNodes;
-    private final MessageQueue messageQueue;
-    
-    public void updateData(String key, String value) {
-        // 异步更新所有节点
-        CompletableFuture.runAsync(() -> {
-            // 更新主节点
-            DataNode primaryNode = dataNodes.get(0);
-            primaryNode.update(key, value);
-            
-            // 异步同步到其他节点
-            for (int i = 1; i < dataNodes.size(); i++) {
-                final int nodeIndex = i;
-                CompletableFuture.runAsync(() -> {
-                    try {
-                        dataNodes.get(nodeIndex).update(key, value);
-                    } catch (Exception e) {
-                        // 失败则发送到消息队列重试
-                        messageQueue.send(new SyncMessage(nodeIndex, key, value));
-                    }
-                });
-            }
-        });
-    }
-    
-    // 处理同步失败的消息
-    public void handleSyncFailure() {
-        messageQueue.consume(message -> {
-            SyncMessage syncMsg = (SyncMessage) message;
-            try {
-                dataNodes.get(syncMsg.getNodeIndex())
-                    .update(syncMsg.getKey(), syncMsg.getValue());
-            } catch (Exception e) {
-                // 继续重试或记录错误
-                scheduleRetry(syncMsg);
-            }
-        });
-    }
-}
-```
+#### 题目1：CAP定理深度解析与实际应用
+**问题背景**：设计一个全球分布式的社交媒体平台
 
-**不同场景的CAP选择:**
+**技术挑战**：
+- 如何在CAP三者间进行权衡选择
+- 如何处理网络分区和节点故障
+- 如何保证用户体验和数据一致性
 
-| 系统类型 | CAP选择 | 典型应用 | 权衡说明 |
-|----------|---------|----------|----------|
-| **金融系统** | CP | 银行转账、交易系统 | 宁可暂停服务也要保证数据一致性 |
-| **社交媒体** | AP | 微博、朋友圈 | 允许数据延迟，优先保证用户体验 |
-| **电商库存** | CP | 商品库存管理 | 避免超卖，确保数据准确性 |
-| **内容分发** | AP | CDN、新闻推送 | 允许数据不一致，优先保证可用性 |
+**考察要点**：
+- CAP定理的准确理解和应用
+- 分布式系统的权衡决策能力
+- 实际场景中的架构设计思维
 
----
+**📁 完整解决方案**：[CAP定理实践应用完整实现](../../solutions/common/cap-theorem-implementation.md)
 
-### 2. 分布式一致性协议
+#### 题目2：BASE理论与最终一致性设计
+**问题背景**：构建大规模电商平台的订单处理系统
 
-#### **【高级】** 对比 Raft 和 Paxos 协议的异同，并解释 Raft 的选举和日志复制流程
+**技术挑战**：
+- 设计最终一致性的数据同步机制
+- 处理分布式系统的可用性要求
+- 平衡性能和一致性的需求
 
-**💡 考察要点:**
-- 一致性协议的深度理解
-- Raft 协议的详细流程
-- 实际应用场景分析
+**考察要点**：
+- BASE理论的深度理解
+- 最终一致性的实现策略
+- 分布式系统的可用性设计
 
-```mermaid
-sequenceDiagram
-    participant F as Follower
-    participant C as Candidate  
-    participant L as Leader
-    participant F2 as Other Followers
-    
-    Note over F,F2: 1. Leader选举阶段
-    F->>C: 超时触发选举
-    C->>F2: RequestVote RPC
-    F2-->>C: 投票响应
-    C->>L: 获得多数票成为Leader
-    
-    Note over L,F2: 2. 日志复制阶段
-    L->>F2: AppendEntries RPC (心跳)
-    F2-->>L: 心跳响应
-    
-    L->>F2: AppendEntries RPC (日志条目)
-    F2-->>L: 日志接收确认
-    L->>L: 收到多数确认，提交日志
-    L->>F2: 下次心跳通知可以提交
-```
+**📁 完整解决方案**：[BASE理论应用完整实现](../../solutions/common/base-theory-application.md)
 
-**📝 参考答案:**
+### 一致性协议与算法 🔄
 
-**Raft vs Paxos 对比:**
+#### 题目3：Raft一致性算法实现与优化
+**问题背景**：构建高可用的分布式配置管理系统
 
-| 特性 | Raft | Paxos |
-|------|------|-------|
-| **理解难度** | 相对简单，分阶段设计 | 复杂，理论性强 |
-| **实现复杂度** | 较低，工程化友好 | 较高，需要多种优化 |
-| **性能** | 中等，但稳定 | 理论最优，但实现复杂 |
-| **应用场景** | etcd, Consul, LogCabin | Chubby, Spanner |
+**技术挑战**：
+- 实现Raft算法的核心机制
+- 处理网络分区和节点故障
+- 优化算法性能和收敛速度
 
-**Raft 协议实现示例:**
+**考察要点**：
+- Raft算法的深度理解
+- 分布式一致性的实现能力
+- 算法优化和性能调优
 
-```java
-public class RaftNode {
-    // 持久化状态
-    private int currentTerm = 0;
-    private String votedFor = null;
-    private List<LogEntry> log = new ArrayList<>();
-    
-    // 易失状态
-    private int commitIndex = 0;
-    private int lastApplied = 0;
-    
-    // Leader特有状态
-    private Map<String, Integer> nextIndex = new HashMap<>();
-    private Map<String, Integer> matchIndex = new HashMap<>();
-    
-    private NodeState state = NodeState.FOLLOWER;
-    private long lastHeartbeat = System.currentTimeMillis();
-    
-    public enum NodeState {
-        FOLLOWER, CANDIDATE, LEADER
-    }
-    
-    // 1. 选举超时处理
-    public void handleElectionTimeout() {
-        if (state != NodeState.LEADER) {
-            startElection();
-        }
-    }
-    
-    private void startElection() {
-        state = NodeState.CANDIDATE;
-        currentTerm++;
-        votedFor = getNodeId();
-        lastHeartbeat = System.currentTimeMillis();
-        
-        int voteCount = 1; // 自己的票
-        
-        // 向其他节点请求投票
-        for (String nodeId : getClusterNodes()) {
-            CompletableFuture.supplyAsync(() -> 
-                requestVote(nodeId, currentTerm, getLastLogIndex(), getLastLogTerm())
-            ).thenAccept(granted -> {
-                if (granted && state == NodeState.CANDIDATE) {
-                    synchronized (this) {
-                        voteCount++;
-                        if (voteCount > getClusterSize() / 2) {
-                            becomeLeader();
-                        }
-                    }
-                }
-            });
-        }
-    }
-    
-    // 2. 处理投票请求
-    public boolean handleRequestVote(int term, String candidateId, 
-                                   int lastLogIndex, int lastLogTerm) {
-        if (term > currentTerm) {
-            currentTerm = term;
-            votedFor = null;
-            state = NodeState.FOLLOWER;
-        }
-        
-        if (term < currentTerm) {
-            return false;
-        }
-        
-        if (votedFor == null || votedFor.equals(candidateId)) {
-            // 检查候选人日志是否至少和自己一样新
-            int myLastLogTerm = getLastLogTerm();
-            int myLastLogIndex = getLastLogIndex();
-            
-            if (lastLogTerm > myLastLogTerm || 
-                (lastLogTerm == myLastLogTerm && lastLogIndex >= myLastLogIndex)) {
-                votedFor = candidateId;
-                lastHeartbeat = System.currentTimeMillis();
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    // 3. 成为Leader
-    private void becomeLeader() {
-        state = NodeState.LEADER;
-        System.out.println("Node " + getNodeId() + " became leader for term " + currentTerm);
-        
-        // 初始化Leader状态
-        for (String nodeId : getClusterNodes()) {
-            nextIndex.put(nodeId, log.size());
-            matchIndex.put(nodeId, 0);
-        }
-        
-        // 立即发送心跳
-        sendHeartbeats();
-        
-        // 定期发送心跳
-        scheduleHeartbeats();
-    }
-    
-    // 4. 日志复制
-    public void appendEntries(String command) {
-        if (state != NodeState.LEADER) {
-            throw new IllegalStateException("Only leader can append entries");
-        }
-        
-        LogEntry entry = new LogEntry(currentTerm, command, log.size());
-        log.add(entry);
-        
-        // 异步复制到所有follower
-        for (String nodeId : getClusterNodes()) {
-            CompletableFuture.runAsync(() -> replicateToFollower(nodeId));
-        }
-    }
-    
-    private void replicateToFollower(String followerId) {
-        int nextIdx = nextIndex.get(followerId);
-        int prevLogIndex = nextIdx - 1;
-        int prevLogTerm = prevLogIndex >= 0 ? log.get(prevLogIndex).getTerm() : 0;
-        
-        List<LogEntry> entries = log.subList(nextIdx, log.size());
-        
-        boolean success = sendAppendEntries(followerId, currentTerm, prevLogIndex, 
-                                          prevLogTerm, entries, commitIndex);
-        
-        if (success) {
-            // 更新索引
-            nextIndex.put(followerId, log.size());
-            matchIndex.put(followerId, log.size() - 1);
-            
-            // 检查是否可以提交
-            checkCommitIndex();
-        } else {
-            // 回退重试
-            nextIndex.put(followerId, Math.max(0, nextIndex.get(followerId) - 1));
-            replicateToFollower(followerId);
-        }
-    }
-    
-    // 5. 检查提交索引
-    private void checkCommitIndex() {
-        for (int i = commitIndex + 1; i < log.size(); i++) {
-            if (log.get(i).getTerm() == currentTerm) {
-                int replicationCount = 1; // Leader自己
-                
-                for (int matchIdx : matchIndex.values()) {
-                    if (matchIdx >= i) {
-                        replicationCount++;
-                    }
-                }
-                
-                if (replicationCount > getClusterSize() / 2) {
-                    commitIndex = i;
-                    applyLogEntry(log.get(i));
-                }
-            }
-        }
-    }
-}
-```
+**📁 完整解决方案**：[Raft算法完整实现](../../solutions/common/raft-consensus-algorithm.md)
+
+#### 题目4：分布式锁设计与实现
+**问题背景**：设计高并发场景下的资源访问控制
+
+**技术挑战**：
+- 实现高性能的分布式锁机制
+- 处理锁的超时和死锁问题
+- 保证锁的公平性和可重入性
+
+**考察要点**：
+- 分布式锁的设计原理
+- 并发控制的实现策略
+- 性能优化和可靠性保证
+
+**📁 完整解决方案**：[分布式锁系统完整实现](../../solutions/common/distributed-lock-system.md)
+
+### 分布式事务处理 💳
+
+#### 题目5：分布式事务模式设计与选择
+**问题背景**：实现跨多个微服务的业务事务
+
+**技术挑战**：
+- 选择合适的分布式事务模式
+- 处理事务的一致性和性能要求
+- 设计事务失败的补偿机制
+
+**考察要点**：
+- 分布式事务模式的深度理解
+- 事务一致性的实现策略
+- 业务场景的分析和选择能力
+
+**📁 完整解决方案**：[分布式事务模式完整实现](../../solutions/common/distributed-transaction-patterns.md)
+
+#### 题目6：Saga事务模式实现与优化
+**问题背景**：构建复杂业务流程的事务管理
+
+**技术挑战**：
+- 设计Saga事务的编排和协调
+- 实现事务的补偿和回滚机制
+- 处理长事务的性能和可靠性
+
+**考察要点**：
+- Saga模式的设计原理
+- 事务编排的实现策略
+- 长事务的管理和优化
+
+**📁 完整解决方案**：[Saga事务模式完整实现](../../solutions/common/saga-transaction-pattern.md)
+
+## 📊 面试评分标准
+
+### 理论基础掌握 (30%)
+- **优秀 (90-100分)**：深入理解分布式系统核心理论，能够准确分析权衡
+- **良好 (80-89分)**：掌握主要理论概念，理解基本原理
+- **一般 (70-79分)**：了解基础理论，但理解不够深入
+- **不足 (60-69分)**：理论概念模糊，缺乏系统性理解
+
+### 算法原理理解 (25%)
+- **优秀 (90-100分)**：深入理解一致性算法原理，能够分析实现细节
+- **良好 (80-89分)**：掌握主要算法概念，理解基本流程
+- **一般 (70-79分)**：了解算法基础，但原理理解有限
+- **不足 (60-69分)**：算法理解薄弱，缺乏深度认知
+
+### 架构设计能力 (25%)
+- **优秀 (90-100分)**：能够设计完整的分布式系统架构，考虑全面
+- **良好 (80-89分)**：具备基本的架构设计能力，能够识别关键问题
+- **一般 (70-79分)**：有一定设计思路，但系统性不够
+- **不足 (60-69分)**：架构设计能力薄弱，思路不清晰
+
+### 实践经验展示 (20%)
+- **优秀 (90-100分)**：有丰富的分布式系统实践经验，能够分享具体案例
+- **良好 (80-89分)**：有一定实践经验，能够结合项目讲解
+- **一般 (70-79分)**：有基础实践，但经验不够丰富
+- **不足 (60-69分)**：缺乏实际项目经验
+
+## 🎯 备考建议
+
+### 理论基础强化
+- 深入学习CAP定理、BASE理论等核心概念
+- 理解分布式系统的基本挑战和解决思路
+- 掌握一致性、可用性、分区容错的权衡策略
+- 学习分布式系统的设计原则和最佳实践
+
+### 算法原理深入
+- 深入研究Raft、Paxos等一致性算法
+- 理解分布式锁和选举算法的实现原理
+- 掌握分布式时钟和事件顺序的处理
+- 学习拜占庭容错和故障检测机制
+
+### 实践项目积累
+- 参与分布式系统的设计和实现项目
+- 积累分布式事务和一致性的实践经验
+- 掌握分布式系统的监控和故障排查
+- 了解分布式存储和计算框架的应用
+
+### 架构思维培养
+- 学习大规模分布式系统的架构案例
+- 理解不同业务场景下的架构选择
+- 掌握分布式系统的演进和扩展策略
+- 培养系统性的分布式思维
+
+## 🔗 相关资源链接
+
+- [Raft算法论文](https://raft.github.io/raft.pdf)
+- [分布式系统概念与设计](https://book.douban.com/subject/21624776/)
+- [微服务架构设计](./microservices.md)
+- [消息队列系统](./message-queues.md)
 
 ---
 
-### 3. 分布式事务处理
-
-#### **【高级】** 比较 2PC、3PC、TCC、Saga 等分布式事务模式的优缺点和适用场景
-
-**💡 考察要点:**
-- 各种事务模式的原理
-- 性能和一致性权衡
-- 实际场景选择策略
-
-```mermaid
-graph TD
-    Transaction[分布式事务] --> TwoPC[两阶段提交 2PC]
-    Transaction --> ThreePC[三阶段提交 3PC]
-    Transaction --> TCC[TCC 补偿模式]
-    Transaction --> Saga[Saga 长事务]
-    
-    TwoPC --> Prepare[准备阶段]
-    TwoPC --> Commit[提交阶段]
-    
-    TCC --> Try[Try 尝试]
-    TCC --> Confirm[Confirm 确认]
-    TCC --> Cancel[Cancel 取消]
-    
-    Saga --> Forward[前向补偿]
-    Saga --> Backward[反向补偿]
-```
-
-**📝 参考答案:**
-
-**各种分布式事务模式实现:**
-
-```java
-// 1. TCC 模式实现
-public class TccTransactionExample {
-    
-    @Component
-    public class AccountService {
-        
-        // Try: 预处理，冻结资源
-        public boolean tryTransfer(String fromAccount, String toAccount, BigDecimal amount) {
-            try {
-                // 检查账户余额
-                if (getBalance(fromAccount).compareTo(amount) < 0) {
-                    return false;
-                }
-                
-                // 冻结金额
-                freezeAmount(fromAccount, amount);
-                // 预留接收金额
-                reserveAmount(toAccount, amount);
-                
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-        
-        // Confirm: 确认提交
-        public boolean confirmTransfer(String fromAccount, String toAccount, BigDecimal amount) {
-            try {
-                // 扣除冻结金额
-                deductFrozenAmount(fromAccount, amount);
-                // 增加预留金额
-                addReservedAmount(toAccount, amount);
-                
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-        
-        // Cancel: 取消补偿
-        public boolean cancelTransfer(String fromAccount, String toAccount, BigDecimal amount) {
-            try {
-                // 释放冻结金额
-                releaseFrozenAmount(fromAccount, amount);
-                // 取消预留金额
-                cancelReservedAmount(toAccount, amount);
-                
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-    }
-    
-    @Service
-    public class TccTransactionManager {
-        
-        public void executeTransfer(TransferRequest request) {
-            String transactionId = UUID.randomUUID().toString();
-            List<TccAction> actions = new ArrayList<>();
-            
-            try {
-                // Try 阶段
-                boolean allTrySuccess = true;
-                
-                // 转出账户操作
-                TccAction fromAction = createFromAccountAction(request);
-                if (fromAction.doTry()) {
-                    actions.add(fromAction);
-                } else {
-                    allTrySuccess = false;
-                }
-                
-                // 转入账户操作
-                TccAction toAction = createToAccountAction(request);
-                if (toAction.doTry()) {
-                    actions.add(toAction);
-                } else {
-                    allTrySuccess = false;
-                }
-                
-                if (allTrySuccess) {
-                    // Confirm 阶段
-                    confirmAll(actions);
-                } else {
-                    // Cancel 阶段
-                    cancelAll(actions);
-                }
-                
-            } catch (Exception e) {
-                // 异常时执行 Cancel
-                cancelAll(actions);
-                throw new TransactionException("TCC transaction failed", e);
-            }
-        }
-        
-        private void confirmAll(List<TccAction> actions) {
-            for (TccAction action : actions) {
-                try {
-                    action.doConfirm();
-                } catch (Exception e) {
-                    // 记录失败，可能需要人工干预
-                    log.error("Confirm failed for action: " + action.getActionId(), e);
-                }
-            }
-        }
-        
-        private void cancelAll(List<TccAction> actions) {
-            for (TccAction action : actions) {
-                try {
-                    action.doCancel();
-                } catch (Exception e) {
-                    // 记录失败，可能需要人工干预
-                    log.error("Cancel failed for action: " + action.getActionId(), e);
-                }
-            }
-        }
-    }
-}
-
-// 2. Saga 模式实现
-public class SagaTransactionExample {
-    
-    @Service
-    public class OrderSagaOrchestrator {
-        
-        public void processOrder(OrderRequest orderRequest) {
-            SagaTransaction saga = SagaTransaction.builder()
-                .transactionId(UUID.randomUUID().toString())
-                .build();
-            
-            try {
-                // 步骤1: 创建订单
-                saga.addStep(
-                    () -> orderService.createOrder(orderRequest),
-                    () -> orderService.cancelOrder(orderRequest.getOrderId())
-                );
-                
-                // 步骤2: 扣减库存
-                saga.addStep(
-                    () -> inventoryService.deductInventory(orderRequest.getProductId(), orderRequest.getQuantity()),
-                    () -> inventoryService.restoreInventory(orderRequest.getProductId(), orderRequest.getQuantity())
-                );
-                
-                // 步骤3: 处理支付
-                saga.addStep(
-                    () -> paymentService.processPayment(orderRequest.getPaymentInfo()),
-                    () -> paymentService.refundPayment(orderRequest.getPaymentInfo().getTransactionId())
-                );
-                
-                // 步骤4: 发送通知
-                saga.addStep(
-                    () -> notificationService.sendOrderConfirmation(orderRequest.getUserId()),
-                    () -> notificationService.sendOrderCancellation(orderRequest.getUserId())
-                );
-                
-                // 执行Saga
-                executeSaga(saga);
-                
-            } catch (Exception e) {
-                // 执行补偿
-                compensateSaga(saga);
-                throw new OrderProcessingException("Order processing failed", e);
-            }
-        }
-        
-        private void executeSaga(SagaTransaction saga) {
-            for (int i = 0; i < saga.getSteps().size(); i++) {
-                SagaStep step = saga.getSteps().get(i);
-                try {
-                    step.execute();
-                    saga.setCurrentStep(i);
-                } catch (Exception e) {
-                    // 执行失败，触发补偿
-                    saga.setCurrentStep(i - 1);
-                    throw e;
-                }
-            }
-        }
-        
-        private void compensateSaga(SagaTransaction saga) {
-            // 从失败步骤开始，逆序执行补偿
-            for (int i = saga.getCurrentStep(); i >= 0; i--) {
-                SagaStep step = saga.getSteps().get(i);
-                try {
-                    step.compensate();
-                } catch (Exception e) {
-                    // 补偿失败，记录日志，可能需要人工干预
-                    log.error("Compensation failed for step: " + i, e);
-                }
-            }
-        }
-    }
-    
-    public static class SagaTransaction {
-        private String transactionId;
-        private List<SagaStep> steps = new ArrayList<>();
-        private int currentStep = -1;
-        
-        public void addStep(Runnable action, Runnable compensation) {
-            steps.add(new SagaStep(action, compensation));
-        }
-    }
-    
-    public static class SagaStep {
-        private final Runnable action;
-        private final Runnable compensation;
-        
-        public void execute() {
-            action.run();
-        }
-        
-        public void compensate() {
-            compensation.run();
-        }
-    }
-}
-```
-
-**分布式事务模式对比:**
-
-| 模式 | 一致性 | 性能 | 复杂度 | 适用场景 |
-|------|--------|------|--------|----------|
-| **2PC** | 强一致 | 低 | 中等 | 金融系统、关键业务 |
-| **3PC** | 强一致 | 低 | 高 | 对可用性要求更高的场景 |
-| **TCC** | 最终一致 | 中等 | 高 | 电商、支付等业务 |
-| **Saga** | 最终一致 | 高 | 中等 | 长流程业务、微服务 |
-
----
-
-## 🎯 面试技巧建议
-
-### 分布式系统回答策略
-1. **理论基础**: 先阐述基本概念和原理
-2. **权衡分析**: 分析不同方案的优缺点
-3. **场景应用**: 结合具体业务场景举例
-4. **实践经验**: 分享遇到的问题和解决方案
-
-### 常见追问问题
-- "如何解决分布式系统中的脑裂问题？"
-- "分布式ID生成有哪些方案？"
-- "如何实现分布式限流？"
-- "微服务间如何保证数据一致性？"
-
-## 🔗 相关链接
-
-- [← 返回后端目录](./README.md)
-- [微服务架构](./microservices.md)
-- [消息队列](./message-queues.md)
-- [缓存系统](./caching.md)
-
----
-
-*分布式系统是现代后端架构的核心，理解其设计原理对系统架构师至关重要* 🏗️ 
+*分布式系统的核心在于理解和处理分布式环境下的一致性、可用性和分区容错性挑战* 🌐 

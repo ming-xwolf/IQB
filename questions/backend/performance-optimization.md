@@ -2,467 +2,233 @@
 
 [← 返回后端面试题目录](./README.md)
 
-## 🎯 核心知识点
+## 📚 题目概览
 
-- 性能分析方法
-- 代码层面优化
-- 数据库优化
-- 架构优化
-- 缓存策略
-- 负载均衡
-- 监控与诊断
-- 性能测试
+性能优化是后端开发的核心技能，直接影响用户体验和系统成本。本章节重点考察候选人对性能优化方法论的深度理解，包括性能分析、代码优化、架构优化等核心技术，以及在不同场景下的实际优化能力。
 
-## 📊 性能优化金字塔
+## 🎯 核心技术考察重点
 
-```mermaid
-graph TD
-    A[性能优化策略] --> B[代码优化]
-    A --> C[数据库优化] 
-    A --> D[架构优化]
-    A --> E[基础设施优化]
-    
-    B --> B1[算法优化]
-    B --> B2[内存管理]
-    B --> B3[并发处理]
-    
-    C --> C1[查询优化]
-    C --> C2[索引设计]
-    C --> C3[连接池]
-    
-    D --> D1[缓存架构]
-    D --> D2[负载均衡]
-    D --> D3[微服务]
-    
-    E --> E1[服务器配置]
-    E --> E2[网络优化]
-    E --> E3[CDN]
-```
+### 性能分析与诊断
+- 性能指标的定义和测量方法
+- 性能瓶颈的识别和分析技巧
+- 性能监控工具的使用和数据解读
+- 性能问题的根因分析方法
 
-## 💡 面试题目
+### 代码层面优化
+- 算法和数据结构的优化策略
+- 内存管理和垃圾回收优化
+- 并发编程的性能考虑
+- 代码热点的识别和优化
 
-### **初级题目**
+### 数据库性能优化
+- SQL查询优化和执行计划分析
+- 索引设计和优化策略
+- 数据库连接池和事务优化
+- 分库分表和读写分离
 
-#### 1. 什么是性能优化？为什么重要？
+### 系统架构优化
+- 缓存架构的设计和优化
+- 负载均衡和水平扩展
+- 微服务性能优化策略
+- CDN和静态资源优化
 
-**答案要点：**
-- 性能优化的定义：提高系统响应速度、吞吐量、减少资源消耗
-- 重要性：
-  - 用户体验提升
-  - 资源成本节省
-  - 系统稳定性
-  - 竞争优势
-
-#### 2. 常见的性能指标有哪些？
-
-**答案要点：**
-- **响应时间**：用户发起请求到收到响应的时间
-- **吞吐量**：单位时间内处理的请求数量
-- **并发用户数**：同时访问系统的用户数
-- **CPU使用率**：处理器利用率
-- **内存使用率**：内存占用情况
-- **I/O指标**：磁盘和网络I/O性能
-
-```mermaid
-pie title 性能问题分布
-    "数据库查询" : 40
-    "网络延迟" : 25
-    "代码逻辑" : 20
-    "系统配置" : 15
-```
-
-#### 3. 如何识别性能瓶颈？
-
-**答案要点：**
-- 性能监控工具
-- 日志分析
-- APM(应用性能监控)
-- 压力测试
-- 性能分析器(Profiler)
-
-### **中级题目**
-
-#### 4. 数据库查询优化的常见方法有哪些？
-
-**答案要点：**
-- **索引优化**：
-  - 创建合适的索引
-  - 避免过多索引
-  - 复合索引设计
-  
-- **查询优化**：
-  - 避免SELECT *
-  - 使用LIMIT分页
-  - 优化JOIN操作
-  
-- **架构优化**：
-  - 读写分离
-  - 分库分表
-  - 缓存策略
-
-```sql
--- 优化前
-SELECT * FROM users WHERE email LIKE '%@gmail.com' ORDER BY created_at;
-
--- 优化后
-SELECT id, name, email FROM users 
-WHERE email_domain = 'gmail.com' 
-ORDER BY created_at 
-LIMIT 20 OFFSET 0;
-
--- 添加索引
-CREATE INDEX idx_email_domain_created ON users(email_domain, created_at);
-```
-
-#### 5. 缓存策略有哪些？如何选择？
-
-**答案要点：**
-- **缓存类型**：
-  - 内存缓存 (Redis, Memcached)
-  - 本地缓存 (HashMap, LRU)
-  - 分布式缓存
-  - CDN缓存
-  
-- **缓存策略**：
-  - Cache-Aside
-  - Write-Through
-  - Write-Behind
-  - Refresh-Ahead
-
-```mermaid
-flowchart LR
-    A[请求] --> B{缓存命中?}
-    B -->|是| C[返回缓存数据]
-    B -->|否| D[查询数据库]
-    D --> E[更新缓存]
-    E --> F[返回数据]
-```
-
-#### 6. 如何优化Java应用的性能？
-
-**答案要点：**
-- **JVM优化**：
-  - 垃圾回收器选择
-  - 堆内存配置
-  - JIT编译优化
-  
-- **代码优化**：
-  - 避免对象过度创建
-  - 使用合适的集合类
-  - 优化循环和条件判断
-
-```java
-// 优化前 - 字符串拼接
-String result = "";
-for (int i = 0; i < 10000; i++) {
-    result += "item" + i;
-}
-
-// 优化后 - 使用StringBuilder
-StringBuilder sb = new StringBuilder();
-for (int i = 0; i < 10000; i++) {
-    sb.append("item").append(i);
-}
-String result = sb.toString();
-
-// JVM参数优化
-// -Xms2g -Xmx4g -XX:+UseG1GC -XX:MaxGCPauseMillis=200
-```
-
-### **高级题目**
-
-#### 7. 微服务架构下如何进行性能优化？
-
-**答案要点：**
-- **服务间通信优化**：
-  - gRPC vs REST
-  - 连接池管理
-  - 异步通信
-  
-- **服务治理**：
-  - 熔断器模式
-  - 限流策略
-  - 超时设置
-  
-- **数据一致性**：
-  - 事件驱动架构
-  - SAGA模式
-  - 最终一致性
-
-```java
-// Hystrix熔断器示例
-@HystrixCommand(fallbackMethod = "getDefaultUser", 
-    commandProperties = {
-        @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "3000"),
-        @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10"),
-        @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage", value = "50")
-    })
-public User getUserById(Long id) {
-    return userService.findById(id);
-}
-
-public User getDefaultUser(Long id) {
-    return new User(id, "Default User");
-}
-```
-
-#### 8. 如何设计高性能的API？
-
-**答案要点：**
-- **API设计原则**：
-  - RESTful设计
-  - 分页处理
-  - 字段过滤
-  - 版本控制
-  
-- **性能优化**：
-  - 响应压缩
-  - HTTP缓存
-  - 异步处理
-  - 批量操作
-
-```python
-# FastAPI高性能API示例
-from fastapi import FastAPI, BackgroundTasks, Query
-from typing import Optional, List
-import asyncio
-
-app = FastAPI()
-
-@app.get("/users")
-async def get_users(
-    page: int = Query(1, ge=1),
-    size: int = Query(10, ge=1, le=100),
-    fields: Optional[str] = None
-):
-    # 分页查询
-    offset = (page - 1) * size
-    users = await User.objects.offset(offset).limit(size)
-    
-    # 字段过滤
-    if fields:
-        selected_fields = fields.split(',')
-        users = [{k: v for k, v in user.dict().items() if k in selected_fields} for user in users]
-    
-    return {"users": users, "page": page, "size": size}
-
-@app.post("/users/batch")
-async def create_users_batch(users: List[dict], background_tasks: BackgroundTasks):
-    # 批量创建
-    created_users = await User.bulk_create(users)
-    
-    # 异步后处理
-    background_tasks.add_task(send_welcome_emails, created_users)
-    
-    return {"created": len(created_users)}
-```
-
-#### 9. 大数据场景下的性能优化策略？
-
-**答案要点：**
-- **数据处理优化**：
-  - 分片(Sharding)
-  - 分区(Partitioning)
-  - 流式处理
-  - 批处理优化
-  
-- **存储优化**：
-  - 列式存储
-  - 数据压缩
-  - 分布式存储
-  - 索引设计
-
-```python
-# Apache Spark性能优化示例
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, count, sum
-
-spark = SparkSession.builder \
-    .appName("DataProcessingOptimization") \
-    .config("spark.sql.adaptive.enabled", "true") \
-    .config("spark.sql.adaptive.coalescePartitions.enabled", "true") \
-    .getOrCreate()
-
-# 读取数据时指定分区
-df = spark.read.parquet("hdfs://data/transactions") \
-    .filter(col("date") >= "2023-01-01") \
-    .repartition(200, col("user_id"))
-
-# 缓存频繁使用的数据
-df_cached = df.cache()
-
-# 优化聚合操作
-result = df_cached.groupBy("user_id", "category") \
-    .agg(count("*").alias("transaction_count"),
-         sum("amount").alias("total_amount")) \
-    .orderBy("total_amount", ascending=False)
-
-result.write.mode("overwrite").parquet("hdfs://output/user_summary")
-```
-
-### **实战题目**
-
-#### 10. 实现一个高性能的计数器服务
-
-```java
-@Service
-public class HighPerformanceCounter {
-    private final RedisTemplate<String, String> redisTemplate;
-    private final AtomicLong localCounter = new AtomicLong(0);
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    
-    // 批量更新策略
-    private final long BATCH_SIZE = 100;
-    private final long FLUSH_INTERVAL = 5; // 秒
-    
-    @PostConstruct
-    public void init() {
-        // 定时批量同步到Redis
-        scheduler.scheduleAtFixedRate(this::flushToRedis, 
-            FLUSH_INTERVAL, FLUSH_INTERVAL, TimeUnit.SECONDS);
-    }
-    
-    public void increment(String key) {
-        // 本地计数器快速响应
-        localCounter.incrementAndGet();
-        
-        // 异步批量更新
-        if (localCounter.get() % BATCH_SIZE == 0) {
-            CompletableFuture.runAsync(() -> flushToRedis());
-        }
-    }
-    
-    private void flushToRedis() {
-        long count = localCounter.getAndSet(0);
-        if (count > 0) {
-            redisTemplate.opsForValue().increment("global_counter", count);
-        }
-    }
-    
-    public long getCount() {
-        // 合并本地和远程计数
-        long localCount = localCounter.get();
-        String redisCount = redisTemplate.opsForValue().get("global_counter");
-        return localCount + (redisCount != null ? Long.parseLong(redisCount) : 0);
-    }
-}
-```
-
-#### 11. 实现数据库连接池优化
-
-```java
-@Configuration
-public class DatabaseOptimizationConfig {
-    
-    @Bean
-    @Primary
-    public DataSource primaryDataSource() {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://localhost:3306/mydb");
-        config.setUsername("user");
-        config.setPassword("password");
-        
-        // 连接池优化
-        config.setMaximumPoolSize(20);
-        config.setMinimumIdle(5);
-        config.setConnectionTimeout(30000);
-        config.setIdleTimeout(600000);
-        config.setMaxLifetime(1800000);
-        
-        // SQL优化
-        config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("prepStmtCacheSize", "250");
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        config.addDataSourceProperty("useServerPrepStmts", "true");
-        
-        return new HikariDataSource(config);
-    }
-    
-    @Bean
-    public DataSource readOnlyDataSource() {
-        // 读写分离配置
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://readonly-host:3306/mydb");
-        config.setReadOnly(true);
-        config.setMaximumPoolSize(15);
-        
-        return new HikariDataSource(config);
-    }
-}
-
-@Repository
-public class OptimizedUserRepository {
-    
-    @Autowired
-    @Qualifier("primaryDataSource")
-    private JdbcTemplate writeTemplate;
-    
-    @Autowired
-    @Qualifier("readOnlyDataSource")
-    private JdbcTemplate readTemplate;
-    
-    // 批量插入优化
-    public void batchInsertUsers(List<User> users) {
-        String sql = "INSERT INTO users (name, email, created_at) VALUES (?, ?, ?)";
-        
-        readTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                User user = users.get(i);
-                ps.setString(1, user.getName());
-                ps.setString(2, user.getEmail());
-                ps.setTimestamp(3, Timestamp.valueOf(user.getCreatedAt()));
-            }
-            
-            @Override
-            public int getBatchSize() {
-                return users.size();
-            }
-        });
-    }
-}
-```
-
-## 🔗 性能优化工具
-
-### 监控工具对比
+## 📊 知识结构关联图
 
 ```mermaid
 graph TB
-    A[性能监控工具] --> B[APM工具]
-    A --> C[日志分析]
-    A --> D[性能测试]
+    subgraph "性能优化层次"
+        A[性能优化] --> B[代码优化]
+        A --> C[数据库优化]
+        A --> D[架构优化]
+        A --> E[基础设施优化]
+    end
     
-    B --> B1[New Relic]
-    B --> B2[AppDynamics]
-    B --> B3[Skywalking]
+    subgraph "代码优化"
+        B --> F[算法优化]
+        B --> G[内存管理]
+        B --> H[并发处理]
+        B --> I[热点优化]
+    end
     
-    C --> C1[ELK Stack]
-    C --> C2[Fluentd]
-    C --> C3[Grafana]
+    subgraph "数据库优化"
+        C --> J[查询优化]
+        C --> K[索引设计]
+        C --> L[连接池]
+        C --> M[分库分表]
+    end
     
-    D --> D1[JMeter]
-    D --> D2[Gatling]
-    D --> D3[K6]
+    subgraph "架构优化"
+        D --> N[缓存策略]
+        D --> O[负载均衡]
+        D --> P[异步处理]
+        D --> Q[服务拆分]
+    end
+    
+    subgraph "监控诊断"
+        E --> R[性能监控]
+        E --> S[问题诊断]
+        E --> T[容量规划]
+        E --> U[性能测试]
+    end
 ```
 
-### 相关主题
-- [缓存技术面试题](./caching.md)
-- [数据库优化面试题](../database/README.md)
-- [微服务架构面试题](./microservices.md)
-- [系统设计面试题](../system-design/README.md)
+## 📝 核心面试题目
 
-## 📚 推荐资源
+### 性能分析与诊断 🔍
 
-### 书籍推荐
-- 《高性能MySQL》
-- 《Java性能权威指南》
-- 《性能之巅：洞悉系统、企业与云计算》
+#### 题目1：性能瓶颈识别与分析方法
+**问题背景**：系统响应缓慢，需要快速定位性能瓶颈
 
-### 在线资源
-- [Google Web Fundamentals](https://developers.google.com/web/fundamentals/performance)
-- [High Scalability](http://highscalability.com/)
+**技术挑战**：
+- 如何系统性地分析性能问题
+- 如何选择合适的监控工具和指标
+- 如何从海量监控数据中找到关键线索
+
+**考察要点**：
+- 性能分析的方法论和工具使用
+- 监控指标的理解和数据解读能力
+- 问题定位的逻辑思维和实践经验
+
+**📁 完整解决方案**：[性能瓶颈分析完整实现](../../solutions/common/performance-bottleneck-analysis.md)
+
+#### 题目2：APM系统设计与性能监控
+**问题背景**：构建全链路性能监控系统
+
+**技术挑战**：
+- 设计分布式链路追踪机制
+- 实现性能指标的实时收集和分析
+- 建立智能化的性能告警体系
+
+**考察要点**：
+- APM系统的架构设计能力
+- 性能监控的技术实现原理
+- 大规模系统的可观测性设计
+
+**📁 完整解决方案**：[APM监控系统完整实现](../../solutions/common/apm-monitoring-system.md)
+
+### 代码层面优化 ⚡
+
+#### 题目3：Java应用性能调优实战
+**问题背景**：Java应用在高并发场景下性能不佳
+
+**技术挑战**：
+- JVM参数调优和垃圾回收优化
+- 代码热点分析和算法优化
+- 并发编程的性能优化策略
+
+**考察要点**：
+- JVM内存模型和垃圾回收机制
+- Java性能调优的实践经验
+- 并发编程的深度理解
+
+**📁 完整解决方案**：[Java性能调优完整实现](../../solutions/common/java-performance-tuning.md)
+
+#### 题目4：高性能算法设计与优化
+**问题背景**：核心业务算法成为系统性能瓶颈
+
+**技术挑战**：
+- 算法复杂度分析和优化策略
+- 数据结构的选择和优化
+- 内存访问模式的优化
+
+**考察要点**：
+- 算法设计和分析能力
+- 数据结构的深度理解
+- 性能优化的思维方式
+
+**📁 完整解决方案**：[高性能算法优化完整实现](../../solutions/common/high-performance-algorithm-optimization.md)
+
+### 数据库性能优化 💾
+
+#### 题目5：数据库查询优化与索引设计
+**问题背景**：数据库查询响应缓慢，影响整体性能
+
+**技术挑战**：
+- SQL查询的优化策略和执行计划分析
+- 索引的设计原则和优化技巧
+- 大数据量场景下的查询优化
+
+**考察要点**：
+- SQL优化的深度理解
+- 索引原理和设计能力
+- 数据库性能调优经验
+
+**📁 完整解决方案**：[数据库查询优化完整实现](../../solutions/common/database-query-optimization.md)
+
+#### 题目6：分布式数据库性能优化
+**问题背景**：分布式数据库架构的性能优化
+
+**技术挑战**：
+- 数据分片策略和负载均衡
+- 跨库查询的性能优化
+- 分布式事务的性能考虑
+
+**考察要点**：
+- 分布式数据库的架构理解
+- 数据分片和路由策略
+- 分布式系统的性能优化
+
+**📁 完整解决方案**：[分布式数据库优化完整实现](../../solutions/common/distributed-database-optimization.md)
+
+## 📊 面试评分标准
+
+### 理论基础掌握 (25%)
+- **优秀 (90-100分)**：深入理解性能优化原理，掌握系统性的优化方法论
+- **良好 (80-89分)**：了解主要优化技术，具备基本的性能分析能力
+- **一般 (70-79分)**：知道常见优化方法，但理解不够深入
+- **不足 (60-69分)**：性能优化概念模糊，缺乏系统性认知
+
+### 实践经验展示 (30%)
+- **优秀 (90-100分)**：有丰富的性能优化实战经验，能分享具体案例和效果
+- **良好 (80-89分)**：有一定优化实践，能结合项目讲解优化过程
+- **一般 (70-79分)**：有基础的优化经验，但案例不够深入
+- **不足 (60-69分)**：缺乏实际的性能优化项目经验
+
+### 问题分析能力 (25%)
+- **优秀 (90-100分)**：能够系统性分析性能问题，快速定位瓶颈
+- **良好 (80-89分)**：具备基本的问题分析思路，能识别常见问题
+- **一般 (70-79分)**：有一定分析能力，但方法不够系统
+- **不足 (60-69分)**：问题分析能力薄弱，缺乏逻辑性
+
+### 技术深度理解 (20%)
+- **优秀 (90-100分)**：深入理解各层次优化技术的原理和实现
+- **良好 (80-89分)**：掌握主要优化技术的基本原理
+- **一般 (70-79分)**：了解常用优化技术，但原理理解有限
+- **不足 (60-69分)**：技术理解浅显，缺乏深度认知
+
+## 🎯 备考建议
+
+### 理论基础强化
+- 深入学习计算机系统的性能原理
+- 掌握不同层次的性能优化方法
+- 理解性能指标的定义和测量方法
+- 学习性能分析的系统性方法论
+
+### 实践技能提升
+- 熟练使用各种性能分析工具
+- 积累不同场景的优化实践经验
+- 掌握主流技术栈的性能调优
+- 了解大规模系统的性能挑战
+
+### 案例分析能力
+- 分析知名公司的性能优化案例
+- 理解不同业务场景的性能需求
+- 掌握性能问题的根因分析方法
+- 培养系统性的性能思维
+
+### 技术广度拓展
+- 了解前端、后端、数据库的性能优化
+- 掌握分布式系统的性能设计
+- 学习云原生环境的性能优化
+- 关注性能优化的新技术和趋势
+
+## 🔗 相关资源链接
+
+- [Java性能调优指南](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/)
+- [MySQL性能优化手册](https://dev.mysql.com/doc/refman/8.0/en/optimization.html)
+- [数据库设计与优化](./database-design.md)
+- [监控调试技术](./monitoring-debugging.md)
 
 ---
 
-*性能优化是一个持续的过程，需要在设计、开发、部署的各个阶段都要考虑* 🚀 
+*性能优化是一个系统性工程，需要从多个维度综合考虑，平衡性能、成本和复杂度* ⚡ 

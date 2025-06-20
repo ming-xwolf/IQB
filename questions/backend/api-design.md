@@ -1,633 +1,245 @@
-# API 设计面试题
+# API设计面试题
 
-## 🏷️ 标签
-- 技术栈: RESTful API, GraphQL, API网关
-- 难度: 中级到高级
-- 类型: 设计题, 架构题, 实践题
+[← 返回后端面试题目录](./README.md)
 
-## 💡 核心知识点
-- RESTful API 设计原则
-- HTTP 状态码和请求方法
-- API 版本控制策略
-- 认证授权机制
-- API 文档和测试
-- 性能优化和安全防护
+## 📚 题目概览
 
-## 📊 API 设计架构
+API设计是现代软件架构的核心组成部分，直接影响系统的可用性、可维护性和扩展性。本章节重点考察候选人对RESTful API设计原则的理解，以及在复杂业务场景中的API架构设计能力，包括版本控制、安全认证、性能优化等关键技术。
+
+## 🎯 核心技术考察重点
+
+### RESTful API设计原则
+- HTTP方法的正确使用和语义化设计
+- 资源命名规范和URL结构设计
+- HTTP状态码的准确使用和错误处理
+- 请求响应格式的标准化设计
+
+### API架构与治理
+- API版本控制策略和向后兼容性
+- API网关的设计和微服务集成
+- 接口文档自动化生成和维护
+- API监控、限流和熔断机制
+
+### 安全与认证
+- JWT、OAuth 2.0等认证授权机制
+- API密钥管理和权限控制
+- HTTPS加密和数据安全传输
+- 防止常见安全攻击的设计策略
+
+### 性能与优化
+- 缓存策略和CDN加速
+- 数据分页和批量操作设计
+- 异步处理和长连接优化
+- API性能监控和调优策略
+
+## 📊 知识结构关联图
 
 ```mermaid
 graph TB
-    Client[客户端] --> Gateway[API网关]
-    Gateway --> Auth[认证服务]
-    Gateway --> RateLimit[限流服务]
-    Gateway --> Service1[用户服务]
-    Gateway --> Service2[订单服务]
-    Gateway --> Service3[商品服务]
+    subgraph "API设计基础"
+        A[RESTful原则] --> B[HTTP方法]
+        A --> C[资源设计]
+        A --> D[状态码]
+        E[URL设计] --> F[命名规范]
+        E --> G[参数设计]
+    end
     
-    subgraph "API设计层次"
-        REST[RESTful API]
-        GraphQL[GraphQL API]
-        RPC[RPC API]
+    subgraph "API架构"
+        H[API网关] --> I[路由转发]
+        H --> J[负载均衡]
+        H --> K[服务发现]
+        L[微服务集成] --> M[服务拆分]
+        L --> N[数据一致性]
     end
     
     subgraph "安全机制"
-        JWT[JWT Token]
-        OAuth[OAuth 2.0]
-        HTTPS[HTTPS加密]
+        O[身份认证] --> P[JWT Token]
+        O --> Q[OAuth 2.0]
+        R[权限控制] --> S[RBAC]
+        R --> T[API Key]
+        U[数据安全] --> V[HTTPS]
+        U --> W[数据加密]
     end
+    
+    subgraph "性能优化"
+        X[缓存策略] --> Y[Redis缓存]
+        X --> Z[CDN加速]
+        AA[限流熔断] --> BB[令牌桶]
+        AA --> CC[熔断器]
+        DD[监控告警] --> EE[APM监控]
+        DD --> FF[日志分析]
+    end
+    
+    A --> H
+    H --> O
+    O --> X
+    
+    style A fill:#e1f5fe
+    style H fill:#f3e5f5
+    style O fill:#e8f5e8
+    style X fill:#fff3e0
 ```
 
-## 📝 面试题目
+## 📝 核心面试题目
 
-### 1. RESTful API 设计原则
+### RESTful API设计 🌐
 
-#### **【中级】** 设计一个电商系统的 RESTful API，包含用户、商品、订单管理
+#### 题目1：电商系统RESTful API完整设计
+**问题背景**：设计一个完整的电商系统API，包含用户管理、商品管理、订单处理等核心功能
 
-**💡 考察要点:**
-- REST 设计原则理解
-- HTTP 方法的正确使用
-- 资源命名规范
-- 状态码使用
+**技术挑战**：
+- 复杂业务场景的资源建模和关系设计
+- HTTP方法的语义化使用和幂等性保证
+- 错误处理和异常场景的API设计
+- 数据验证和业务规则的API层实现
 
-**📝 参考答案:**
+**考察要点**：
+- RESTful设计原则的深度理解和应用
+- 复杂业务逻辑的API抽象能力
+- HTTP协议的正确使用和优化
+- API可用性和用户体验的设计考虑
 
-**RESTful API 设计实例:**
+**📁 完整解决方案**：[电商系统RESTful API设计](../../solutions/common/ecommerce-restful-api.md)
 
-```java
-// 1. 用户管理 API 设计
-@RestController
-@RequestMapping("/api/v1/users")
-@Validated
-public class UserController {
-    
-    @Autowired
-    private UserService userService;
-    
-    // 获取用户列表 (支持分页和筛选)
-    @GetMapping
-    public ResponseEntity<ApiResponse<PageResult<UserDTO>>> getUsers(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) UserStatus status) {
-        
-        PageRequest pageRequest = PageRequest.of(page - 1, size);
-        UserQueryParam queryParam = UserQueryParam.builder()
-            .keyword(keyword)
-            .status(status)
-            .build();
-            
-        PageResult<UserDTO> result = userService.getUsers(queryParam, pageRequest);
-        
-        return ResponseEntity.ok(ApiResponse.success(result));
-    }
-    
-    // 获取单个用户
-    @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserDTO>> getUser(@PathVariable Long userId) {
-        UserDTO user = userService.getUserById(userId);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(ApiResponse.success(user));
-    }
-    
-    // 创建用户
-    @PostMapping
-    public ResponseEntity<ApiResponse<UserDTO>> createUser(
-            @Valid @RequestBody CreateUserRequest request) {
-        
-        UserDTO createdUser = userService.createUser(request);
-        
-        URI location = ServletUriComponentsBuilder
-            .fromCurrentRequest()
-            .path("/{id}")
-            .buildAndExpand(createdUser.getId())
-            .toUri();
-            
-        return ResponseEntity.created(location)
-            .body(ApiResponse.success(createdUser));
-    }
-    
-    // 更新用户 (完整更新)
-    @PutMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserDTO>> updateUser(
-            @PathVariable Long userId,
-            @Valid @RequestBody UpdateUserRequest request) {
-        
-        UserDTO updatedUser = userService.updateUser(userId, request);
-        return ResponseEntity.ok(ApiResponse.success(updatedUser));
-    }
-    
-    // 部分更新用户
-    @PatchMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserDTO>> patchUser(
-            @PathVariable Long userId,
-            @RequestBody Map<String, Object> updates) {
-        
-        UserDTO patchedUser = userService.patchUser(userId, updates);
-        return ResponseEntity.ok(ApiResponse.success(patchedUser));
-    }
-    
-    // 删除用户 (软删除)
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
-        userService.deleteUser(userId);
-        return ResponseEntity.noContent().build();
-    }
-    
-    // 用户关系管理 - 关注用户
-    @PostMapping("/{userId}/following/{targetUserId}")
-    public ResponseEntity<Void> followUser(
-            @PathVariable Long userId,
-            @PathVariable Long targetUserId) {
-        
-        userService.followUser(userId, targetUserId);
-        return ResponseEntity.ok().build();
-    }
-    
-    // 获取用户关注列表
-    @GetMapping("/{userId}/following")
-    public ResponseEntity<ApiResponse<List<UserDTO>>> getFollowing(
-            @PathVariable Long userId) {
-        
-        List<UserDTO> following = userService.getFollowing(userId);
-        return ResponseEntity.ok(ApiResponse.success(following));
-    }
-}
+#### 题目2：API版本控制与向后兼容策略
+**问题背景**：在不断演进的业务需求中，设计灵活的API版本控制机制
 
-// 2. 商品管理 API 设计
-@RestController
-@RequestMapping("/api/v1/products")
-public class ProductController {
-    
-    @Autowired
-    private ProductService productService;
-    
-    // 商品列表 (支持搜索、筛选、排序)
-    @GetMapping
-    public ResponseEntity<ApiResponse<PageResult<ProductDTO>>> getProducts(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir) {
-        
-        ProductSearchParam searchParam = ProductSearchParam.builder()
-            .keyword(keyword)
-            .categoryId(categoryId)
-            .minPrice(minPrice)
-            .maxPrice(maxPrice)
-            .build();
-            
-        Sort sort = Sort.by(
-            "desc".equals(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC,
-            sortBy
-        );
-        
-        PageRequest pageRequest = PageRequest.of(page - 1, size, sort);
-        PageResult<ProductDTO> result = productService.searchProducts(searchParam, pageRequest);
-        
-        return ResponseEntity.ok(ApiResponse.success(result));
-    }
-    
-    // 商品详情
-    @GetMapping("/{productId}")
-    public ResponseEntity<ApiResponse<ProductDetailDTO>> getProduct(
-            @PathVariable Long productId) {
-        
-        ProductDetailDTO product = productService.getProductDetail(productId);
-        if (product == null) {
-            return ResponseEntity.notFound().build();
-        }
-        
-        return ResponseEntity.ok(ApiResponse.success(product));
-    }
-    
-    // 商品库存信息
-    @GetMapping("/{productId}/inventory")
-    public ResponseEntity<ApiResponse<InventoryDTO>> getInventory(
-            @PathVariable Long productId) {
-        
-        InventoryDTO inventory = productService.getInventory(productId);
-        return ResponseEntity.ok(ApiResponse.success(inventory));
-    }
-    
-    // 商品评价列表
-    @GetMapping("/{productId}/reviews")
-    public ResponseEntity<ApiResponse<PageResult<ReviewDTO>>> getReviews(
-            @PathVariable Long productId,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        
-        PageRequest pageRequest = PageRequest.of(page - 1, size);
-        PageResult<ReviewDTO> reviews = productService.getReviews(productId, pageRequest);
-        
-        return ResponseEntity.ok(ApiResponse.success(reviews));
-    }
-}
+**技术挑战**：
+- 多版本API的并行维护和管理
+- 向后兼容性的保证和破坏性变更处理
+- 版本废弃策略和客户端迁移方案
+- 版本控制对系统性能的影响
 
-// 3. 订单管理 API 设计
-@RestController
-@RequestMapping("/api/v1/orders")
-public class OrderController {
-    
-    @Autowired
-    private OrderService orderService;
-    
-    // 创建订单
-    @PostMapping
-    public ResponseEntity<ApiResponse<OrderDTO>> createOrder(
-            @Valid @RequestBody CreateOrderRequest request,
-            @AuthenticationPrincipal UserPrincipal currentUser) {
-        
-        OrderDTO order = orderService.createOrder(currentUser.getId(), request);
-        
-        URI location = ServletUriComponentsBuilder
-            .fromCurrentRequest()
-            .path("/{id}")
-            .buildAndExpand(order.getId())
-            .toUri();
-            
-        return ResponseEntity.created(location)
-            .body(ApiResponse.success(order));
-    }
-    
-    // 获取用户订单列表
-    @GetMapping
-    public ResponseEntity<ApiResponse<PageResult<OrderDTO>>> getUserOrders(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) OrderStatus status,
-            @AuthenticationPrincipal UserPrincipal currentUser) {
-        
-        PageRequest pageRequest = PageRequest.of(page - 1, size);
-        PageResult<OrderDTO> orders = orderService.getUserOrders(
-            currentUser.getId(), status, pageRequest);
-            
-        return ResponseEntity.ok(ApiResponse.success(orders));
-    }
-    
-    // 订单详情
-    @GetMapping("/{orderId}")
-    public ResponseEntity<ApiResponse<OrderDetailDTO>> getOrder(
-            @PathVariable Long orderId,
-            @AuthenticationPrincipal UserPrincipal currentUser) {
-        
-        OrderDetailDTO order = orderService.getOrderDetail(orderId, currentUser.getId());
-        if (order == null) {
-            return ResponseEntity.notFound().build();
-        }
-        
-        return ResponseEntity.ok(ApiResponse.success(order));
-    }
-    
-    // 支付订单
-    @PostMapping("/{orderId}/payment")
-    public ResponseEntity<ApiResponse<PaymentDTO>> payOrder(
-            @PathVariable Long orderId,
-            @Valid @RequestBody PaymentRequest request,
-            @AuthenticationPrincipal UserPrincipal currentUser) {
-        
-        PaymentDTO payment = orderService.payOrder(orderId, currentUser.getId(), request);
-        return ResponseEntity.ok(ApiResponse.success(payment));
-    }
-    
-    // 取消订单
-    @PostMapping("/{orderId}/cancellation")
-    public ResponseEntity<Void> cancelOrder(
-            @PathVariable Long orderId,
-            @RequestBody(required = false) CancelOrderRequest request,
-            @AuthenticationPrincipal UserPrincipal currentUser) {
-        
-        orderService.cancelOrder(orderId, currentUser.getId(), 
-            request != null ? request.getReason() : null);
-        return ResponseEntity.ok().build();
-    }
-    
-    // 确认收货
-    @PostMapping("/{orderId}/confirmation")
-    public ResponseEntity<Void> confirmOrder(
-            @PathVariable Long orderId,
-            @AuthenticationPrincipal UserPrincipal currentUser) {
-        
-        orderService.confirmOrder(orderId, currentUser.getId());
-        return ResponseEntity.ok().build();
-    }
-}
+**考察要点**：
+- API演进策略的系统性思考
+- 版本控制技术方案的对比分析
+- 客户端兼容性的实际考虑
+- API生命周期管理的最佳实践
 
-// 4. 统一响应格式
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class ApiResponse<T> {
-    private boolean success;
-    private String message;
-    private T data;
-    private String timestamp;
-    private String traceId;
-    
-    public static <T> ApiResponse<T> success(T data) {
-        return ApiResponse.<T>builder()
-            .success(true)
-            .message("操作成功")
-            .data(data)
-            .timestamp(LocalDateTime.now().toString())
-            .traceId(MDC.get("traceId"))
-            .build();
-    }
-    
-    public static <T> ApiResponse<T> error(String message) {
-        return ApiResponse.<T>builder()
-            .success(false)
-            .message(message)
-            .timestamp(LocalDateTime.now().toString())
-            .traceId(MDC.get("traceId"))
-            .build();
-    }
-}
+**📁 完整解决方案**：[API版本控制系统](../../solutions/common/api-versioning-system.md)
 
-// 5. 分页结果封装
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class PageResult<T> {
-    private List<T> content;
-    private int page;
-    private int size;
-    private long totalElements;
-    private int totalPages;
-    private boolean first;
-    private boolean last;
-    private boolean hasNext;
-    private boolean hasPrevious;
-}
-```
+### API网关与微服务 🚪
 
-**API 设计规范总结:**
+#### 题目3：高性能API网关架构设计
+**问题背景**：构建支持高并发的API网关系统，实现统一的服务入口
 
-| 方面 | 规范 | 示例 |
-|------|------|------|
-| **URL命名** | 名词复数，小写，连字符分隔 | `/api/v1/users`, `/api/v1/order-items` |
-| **HTTP方法** | 语义化使用 | GET查询、POST创建、PUT更新、DELETE删除 |
-| **状态码** | 标准HTTP状态码 | 200成功、201创建、400错误、404未找到 |
-| **版本控制** | URL路径版本 | `/api/v1/`, `/api/v2/` |
-| **请求体** | JSON格式，驼峰命名 | `{"firstName": "John"}` |
-| **响应体** | 统一格式包装 | `{"success": true, "data": {}}` |
+**技术挑战**：
+- 请求路由和负载均衡算法设计
+- 服务发现和健康检查机制
+- 限流熔断和故障隔离策略
+- 性能监控和实时告警系统
+
+**考察要点**：
+- 分布式系统架构的设计能力
+- 高可用和高性能的技术方案
+- 微服务治理的实践经验
+- 系统监控和运维的综合考虑
+
+**📁 完整解决方案**：[高性能API网关实现](../../solutions/common/api-gateway-system.md)
+
+### 安全与认证 🔐
+
+#### 题目4：企业级API安全认证系统
+**问题背景**：设计安全可靠的API认证授权系统，支持多种认证方式
+
+**技术挑战**：
+- JWT Token的安全设计和刷新机制
+- OAuth 2.0授权流程的完整实现
+- API密钥管理和权限控制系统
+- 安全攻击防护和审计日志记录
+
+**考察要点**：
+- 安全认证机制的深度理解
+- 多种认证方式的适用场景分析
+- 安全威胁的识别和防护策略
+- 合规性要求的技术实现
+
+**📁 完整解决方案**：[API安全认证系统](../../solutions/common/api-security-auth.md)
+
+### 性能优化与监控 ⚡
+
+#### 题目5：API性能优化与缓存策略
+**问题背景**：优化API响应性能，设计多层次的缓存架构
+
+**技术挑战**：
+- 多级缓存策略的设计和实现
+- 缓存一致性和失效策略
+- CDN加速和静态资源优化
+- 数据库查询优化和连接池管理
+
+**考察要点**：
+- 性能优化的系统性方法
+- 缓存技术的深度应用
+- 性能瓶颈的识别和解决
+- 大规模系统的性能调优经验
+
+**📁 完整解决方案**：[API性能优化系统](../../solutions/common/api-performance-optimization.md)
+
+#### 题目6：API监控与故障诊断系统
+**问题背景**：构建完整的API监控体系，实现快速故障定位和恢复
+
+**技术挑战**：
+- 全链路监控和分布式追踪
+- 实时性能指标收集和分析
+- 智能告警和故障自动恢复
+- API使用分析和业务洞察
+
+**考察要点**：
+- 可观测性系统的设计和实现
+- 监控数据的收集和分析策略
+- 故障诊断和根因分析能力
+- DevOps实践和自动化运维
+
+**📁 完整解决方案**：[API监控诊断系统](../../solutions/common/api-monitoring-system.md)
+
+## 📊 面试评分标准
+
+### 设计能力 (35分)
+- **架构设计**：能够设计合理的API架构和服务拆分策略
+- **接口设计**：遵循RESTful原则，设计清晰易用的API接口
+- **数据模型**：合理的数据结构设计和关系建模
+
+### 技术深度 (35分)
+- **协议理解**：深入理解HTTP协议和RESTful设计原则
+- **安全机制**：掌握API安全认证和防护的技术方案
+- **性能优化**：具备API性能分析和优化的实战能力
+
+### 实践经验 (30分)
+- **项目经验**：有实际API设计和开发的项目经验
+- **问题解决**：能够分析和解决复杂的API设计问题
+- **最佳实践**：了解行业最佳实践和设计模式
+
+## 🎯 备考建议
+
+### 学习路径
+1. **基础理论**：深入学习HTTP协议和RESTful设计原则
+2. **实践项目**：通过实际项目掌握API设计和开发技能
+3. **架构设计**：学习微服务架构和API网关的设计模式
+4. **安全机制**：掌握API安全认证和防护的技术方案
+5. **性能优化**：学习API性能分析和优化的方法
+
+### 技术重点
+- **RESTful设计**：掌握资源设计、HTTP方法使用、状态码规范
+- **API网关**：了解服务路由、负载均衡、限流熔断等机制
+- **安全认证**：掌握JWT、OAuth 2.0等认证授权技术
+- **性能优化**：学习缓存策略、CDN加速、数据库优化
+- **监控运维**：了解API监控、日志分析、故障诊断
+
+### 实践项目建议
+- 设计完整的电商API系统
+- 实现API网关和服务治理
+- 构建API安全认证系统
+- 开发API监控分析平台
+- 创建API文档自动化工具
+
+## 🔗 相关资源链接
+
+- [微服务架构面试题](./microservices.md)
+- [Web安全面试题](./web-security.md)
+- [性能优化面试题](./performance-optimization.md)
+- [系统设计面试题](../system-design/README.md)
+- [← 返回后端面试题目录](./README.md)
 
 ---
 
-### 2. API 版本控制和兼容性
-
-#### **【高级】** 如何设计API版本控制策略，保证向后兼容？
-
-**💡 考察要点:**
-- 版本控制策略对比
-- 兼容性保证机制
-- 平滑迁移方案
-
-**📝 参考答案:**
-
-```java
-// 1. URL路径版本控制
-@RestController
-@RequestMapping("/api/v1/users")
-public class UserV1Controller {
-    
-    @GetMapping("/{id}")
-    public ResponseEntity<UserV1DTO> getUser(@PathVariable Long id) {
-        // V1版本的用户数据结构
-        UserV1DTO user = userService.getUserV1(id);
-        return ResponseEntity.ok(user);
-    }
-}
-
-@RestController
-@RequestMapping("/api/v2/users")
-public class UserV2Controller {
-    
-    @GetMapping("/{id}")
-    public ResponseEntity<UserV2DTO> getUser(@PathVariable Long id) {
-        // V2版本的用户数据结构 (新增字段)
-        UserV2DTO user = userService.getUserV2(id);
-        return ResponseEntity.ok(user);
-    }
-}
-
-// 2. Header版本控制
-@RestController
-@RequestMapping("/api/users")
-public class UserVersionController {
-    
-    @GetMapping(value = "/{id}", headers = "API-Version=1")
-    public ResponseEntity<UserV1DTO> getUserV1(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserV1(id));
-    }
-    
-    @GetMapping(value = "/{id}", headers = "API-Version=2")
-    public ResponseEntity<UserV2DTO> getUserV2(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserV2(id));
-    }
-    
-    @GetMapping("/{id}")
-    public ResponseEntity<UserV2DTO> getUser(@PathVariable Long id) {
-        // 默认使用最新版本
-        return getUserV2(id);
-    }
-}
-
-// 3. 参数版本控制
-@RestController
-@RequestMapping("/api/users")
-public class UserParamVersionController {
-    
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getUser(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "2") String version) {
-        
-        switch (version) {
-            case "1":
-                return ResponseEntity.ok(userService.getUserV1(id));
-            case "2":
-                return ResponseEntity.ok(userService.getUserV2(id));
-            default:
-                return ResponseEntity.badRequest()
-                    .body("不支持的API版本: " + version);
-        }
-    }
-}
-
-// 4. 内容协商版本控制
-@RestController
-@RequestMapping("/api/users")
-public class UserContentNegotiationController {
-    
-    @GetMapping(value = "/{id}", produces = "application/vnd.company.user-v1+json")
-    public ResponseEntity<UserV1DTO> getUserV1(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserV1(id));
-    }
-    
-    @GetMapping(value = "/{id}", produces = "application/vnd.company.user-v2+json")
-    public ResponseEntity<UserV2DTO> getUserV2(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserV2(id));
-    }
-}
-
-// 5. 版本兼容性处理服务
-@Service
-public class ApiVersionService {
-    
-    // 数据转换器映射
-    private final Map<String, Function<Object, Object>> converters = Map.of(
-        "user:v1->v2", this::convertUserV1ToV2,
-        "user:v2->v1", this::convertUserV2ToV1
-    );
-    
-    public <T> T convertData(Object source, String fromVersion, String toVersion, Class<T> targetClass) {
-        String converterKey = String.format("user:%s->%s", fromVersion, toVersion);
-        Function<Object, Object> converter = converters.get(converterKey);
-        
-        if (converter != null) {
-            return targetClass.cast(converter.apply(source));
-        }
-        
-        // 如果没有转换器，尝试直接转换
-        return objectMapper.convertValue(source, targetClass);
-    }
-    
-    private UserV2DTO convertUserV1ToV2(Object userV1) {
-        UserV1DTO v1 = (UserV1DTO) userV1;
-        return UserV2DTO.builder()
-            .id(v1.getId())
-            .username(v1.getUsername())
-            .email(v1.getEmail())
-            .createdAt(v1.getCreatedAt())
-            // V2新增字段设置默认值
-            .profilePicture(null)
-            .lastLoginAt(null)
-            .preferences(Collections.emptyMap())
-            .build();
-    }
-    
-    private UserV1DTO convertUserV2ToV1(Object userV2) {
-        UserV2DTO v2 = (UserV2DTO) userV2;
-        return UserV1DTO.builder()
-            .id(v2.getId())
-            .username(v2.getUsername())
-            .email(v2.getEmail())
-            .createdAt(v2.getCreatedAt())
-            // 忽略V2新增字段
-            .build();
-    }
-}
-
-// 6. 弃用警告机制
-@RestController
-@RequestMapping("/api/v1/users")
-@Deprecated
-public class DeprecatedUserController {
-    
-    @GetMapping("/{id}")
-    public ResponseEntity<UserV1DTO> getUser(@PathVariable Long id, HttpServletResponse response) {
-        // 添加弃用警告头
-        response.addHeader("Deprecation", "true");
-        response.addHeader("Sunset", "2024-12-31");
-        response.addHeader("Link", "</api/v2/users>; rel=\"successor-version\"");
-        
-        UserV1DTO user = userService.getUserV1(id);
-        return ResponseEntity.ok(user);
-    }
-}
-
-// 7. API版本管理配置
-@Configuration
-public class ApiVersionConfig {
-    
-    @Bean
-    public VersionedRequestMappingHandlerMapping versionedRequestMappingHandlerMapping() {
-        return new VersionedRequestMappingHandlerMapping();
-    }
-    
-    // 自定义版本解析器
-    public static class VersionedRequestMappingHandlerMapping extends RequestMappingHandlerMapping {
-        
-        @Override
-        protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
-            ApiVersion typeAnnotation = AnnotationUtils.findAnnotation(handlerType, ApiVersion.class);
-            return createCondition(typeAnnotation);
-        }
-        
-        @Override
-        protected RequestCondition<?> getCustomMethodCondition(Method method) {
-            ApiVersion methodAnnotation = AnnotationUtils.findAnnotation(method, ApiVersion.class);
-            return createCondition(methodAnnotation);
-        }
-        
-        private RequestCondition<?> createCondition(ApiVersion apiVersion) {
-            return apiVersion == null ? null : new ApiVersionCondition(apiVersion.value());
-        }
-    }
-}
-
-// API版本注解
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface ApiVersion {
-    String value();
-}
-
-// 使用版本注解
-@RestController
-@RequestMapping("/api/users")
-@ApiVersion("2.0")
-public class VersionedUserController {
-    
-    @GetMapping("/{id}")
-    @ApiVersion("2.1")  // 方法级别版本覆盖类级别
-    public ResponseEntity<UserV2DTO> getUser(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserV2(id));
-    }
-}
-```
-
-**版本控制策略对比:**
-
-| 策略 | 优点 | 缺点 | 适用场景 |
-|------|------|------|----------|
-| **URL路径** | 简单直观，缓存友好 | URL冗余，路由复杂 | 大版本变更 |
-| **Header** | URL简洁，灵活 | 不直观，缓存困难 | 小版本迭代 |
-| **参数** | 简单实现 | 容易忽略，不规范 | 临时兼容 |
-| **内容协商** | 标准化，专业 | 复杂度高，理解困难 | 企业级API |
-
----
-
-## 🎯 面试技巧建议
-
-### API设计回答策略
-1. **原则先行**: 先说明设计原则
-2. **实例说明**: 用具体例子演示
-3. **场景分析**: 分析不同场景的选择
-4. **最佳实践**: 分享行业最佳实践
-
-### 常见追问问题
-- "如何设计API的错误处理？"
-- "GraphQL和REST API的区别？"
-- "API网关的作用是什么？"
-- "如何保证API的安全性？"
-
-## 🔗 相关链接
-
-- [← 返回后端目录](./README.md)
-- [微服务架构](./microservices.md)
-- [Web安全](./web-security.md)
-- [认证授权](./authentication.md)
-
----
-
-*良好的API设计是系统成功的基石，需要平衡易用性、扩展性和兼容性* 🔗 
+*设计优雅的API，构建可扩展的服务架构* 🚀 

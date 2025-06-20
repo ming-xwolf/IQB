@@ -1,420 +1,243 @@
-# Python 基础面试题
+# Python基础面试题
 
-## 🏷️ 标签
-- 技术栈: Python, 基础语法, 数据结构
-- 难度: 初级到中级
-- 类型: 概念题, 编程题, 原理题
+[← 返回后端面试题目录](./README.md)
 
-## 💡 核心知识点
-- Python 语言特性和内存管理
-- 数据类型和数据结构
-- 函数式编程和面向对象
-- 装饰器和元类
-- 异常处理和性能优化
+## 📚 题目概览
 
-## 📊 Python 技术体系
+Python作为一门简洁优雅的编程语言，以其易读性和强大的生态系统广受欢迎。本章节重点考察候选人对Python核心特性的理解，包括语言机制、数据结构、面向对象编程等基础知识，以及在实际开发中的应用能力。
+
+## 🎯 核心技术考察重点
+
+### 语言特性与内存管理
+- GIL（全局解释器锁）的工作原理和影响
+- 内存管理机制和垃圾回收策略
+- 变量作用域和命名空间机制
+- Python解释器的执行模型
+
+### 数据类型与数据结构
+- 可变类型与不可变类型的区别
+- 列表、字典、集合的内部实现
+- 字符串处理和编码机制
+- 数据结构的性能特点和选择策略
+
+### 面向对象编程
+- 类的定义和实例化机制
+- 继承、多态和封装的实现
+- 特殊方法（魔法方法）的使用
+- 属性访问控制和描述符
+
+### 高级特性与设计模式
+- 装饰器的实现原理和应用场景
+- 生成器和迭代器的设计模式
+- 上下文管理器的实现和使用
+- 元类编程和动态类创建
+
+## 📊 知识结构关联图
 
 ```mermaid
 graph TB
-    Python[Python核心] --> Basics[基础语法]
-    Python --> DataTypes[数据类型]
-    Python --> OOP[面向对象]
-    Python --> Advanced[高级特性]
+    subgraph "Python核心机制"
+        A[CPython解释器] --> B[字节码执行]
+        A --> C[GIL机制]
+        A --> D[内存管理]
+        D --> E[引用计数]
+        D --> F[垃圾回收]
+    end
     
-    Basics --> Variables[变量作用域]
-    Basics --> Functions[函数定义]
-    Basics --> Control[控制结构]
+    subgraph "数据类型系统"
+        G[基本类型] --> H[数字类型]
+        G --> I[字符串类型]
+        G --> J[布尔类型]
+        K[容器类型] --> L[列表/元组]
+        K --> M[字典/集合]
+        K --> N[自定义类型]
+    end
     
-    DataTypes --> Numbers[数字类型]
-    DataTypes --> Strings[字符串]
-    DataTypes --> Collections[容器类型]
+    subgraph "面向对象"
+        O[类定义] --> P[属性和方法]
+        O --> Q[继承机制]
+        O --> R[多态实现]
+        S[特殊方法] --> T[运算符重载]
+        S --> U[属性访问]
+    end
     
-    OOP --> Class[类和对象]
-    OOP --> Inheritance[继承]
-    OOP --> Polymorphism[多态]
+    subgraph "高级特性"
+        V[装饰器] --> W[函数装饰器]
+        V --> X[类装饰器]
+        Y[生成器] --> Z[迭代协议]
+        AA[元类] --> BB[类创建过程]
+    end
     
-    Advanced --> Decorators[装饰器]
-    Advanced --> Generators[生成器]
-    Advanced --> Metaclass[元类]
+    A --> G
+    G --> O
+    O --> V
+    
+    style A fill:#e1f5fe
+    style G fill:#f3e5f5
+    style O fill:#e8f5e8
+    style V fill:#fff3e0
 ```
 
-## 📝 面试题目
+## 📝 核心面试题目
 
-### 1. Python 语言特性
+### 语言机制与性能 🔧
 
-#### **【中级】** Python 的 GIL 是什么？对多线程有什么影响？
+#### 题目1：GIL机制深度解析与多线程优化
+**问题背景**：理解Python GIL对多线程性能的影响和优化策略
 
-**💡 考察要点:**
-- GIL 的工作原理
-- 多线程性能影响
-- 解决方案
+**技术挑战**：
+- GIL的工作原理和释放时机
+- CPU密集型与I/O密集型任务的不同表现
+- 多线程、多进程、异步编程的选择策略
+- 性能测试和瓶颈分析方法
 
-**📝 参考答案:**
+**考察要点**：
+- 深度理解GIL的实现机制和设计原因
+- 能够分析不同并发模型的适用场景
+- 掌握Python并发编程的最佳实践
+- 具备性能优化的实战经验
 
-**GIL (Global Interpreter Lock) 详解:**
+**📁 完整解决方案**：[Python GIL机制与并发优化](../../solutions/common/python-gil-concurrency.md)
 
-```python
-import threading
-import time
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+#### 题目2：内存管理与垃圾回收机制
+**问题背景**：深入理解Python内存管理和性能优化策略
 
-# 1. GIL 对CPU密集型任务的影响
-def cpu_intensive_task(n):
-    """CPU密集型任务"""
-    start = time.time()
-    total = 0
-    for i in range(n):
-        total += i * i
-    end = time.time()
-    return f"结果: {total}, 耗时: {end - start:.2f}秒"
+**技术挑战**：
+- 引用计数和循环引用的处理
+- 分代垃圾回收算法的实现
+- 内存泄漏的识别和预防
+- 大对象和内存池的管理策略
 
-# 单线程执行
-def single_thread_test():
-    start = time.time()
-    results = [cpu_intensive_task(1000000) for _ in range(4)]
-    end = time.time()
-    print(f"单线程总耗时: {end - start:.2f}秒")
+**考察要点**：
+- Python内存管理的底层机制
+- 垃圾回收的触发条件和优化策略
+- 内存泄漏的常见原因和解决方案
+- 内存性能监控和调优方法
 
-# 多线程执行 (受GIL限制)
-def multi_thread_test():
-    start = time.time()
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(cpu_intensive_task, 1000000) for _ in range(4)]
-        results = [future.result() for future in futures]
-    end = time.time()
-    print(f"多线程总耗时: {end - start:.2f}秒")
+**📁 完整解决方案**：[Python内存管理详解](../../solutions/common/python-memory-management.md)
 
-# 多进程执行 (绕过GIL)
-def multi_process_test():
-    start = time.time()
-    with ProcessPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(cpu_intensive_task, 1000000) for _ in range(4)]
-        results = [future.result() for future in futures]
-    end = time.time()
-    print(f"多进程总耗时: {end - start:.2f}秒")
+### 数据结构与算法 📊
 
-# 2. GIL 对IO密集型任务影响较小
-import requests
+#### 题目3：高性能数据结构实现
+**问题背景**：实现高效的缓存和数据结构算法
 
-def io_intensive_task(url):
-    """IO密集型任务"""
-    start = time.time()
-    response = requests.get(url)
-    end = time.time()
-    return f"状态: {response.status_code}, 耗时: {end - start:.2f}秒"
+**技术挑战**：
+- LRU缓存的O(1)时间复杂度实现
+- 哈希表冲突处理和性能优化
+- 自定义数据结构的设计和实现
+- 大数据场景下的内存效率优化
 
-def io_multithread_test():
-    urls = ["http://httpbin.org/delay/1"] * 4
-    
-    # 多线程IO测试
-    start = time.time()
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(io_intensive_task, url) for url in urls]
-        results = [future.result() for future in futures]
-    end = time.time()
-    print(f"IO多线程总耗时: {end - start:.2f}秒")
+**考察要点**：
+- 数据结构的时间空间复杂度分析
+- Python内置数据结构的实现原理
+- 算法设计和性能优化思路
+- 实际应用场景的技术选型
 
-# GIL解决方案
-print("=== GIL影响测试 ===")
-print("CPU密集型任务:")
-single_thread_test()
-multi_thread_test()
-multi_process_test()
+**📁 完整解决方案**：[Python数据结构实现](../../solutions/common/python-data-structures.md)
 
-print("\nIO密集型任务:")
-io_multithread_test()
-```
+### 面向对象编程 🏗️
+
+#### 题目4：高级面向对象设计模式
+**问题背景**：设计灵活可扩展的面向对象架构
+
+**技术挑战**：
+- 多重继承和MRO（方法解析顺序）
+- 抽象基类和接口设计
+- 设计模式的Python实现
+- 元类编程和动态类创建
+
+**考察要点**：
+- 面向对象设计原则的应用
+- Python特有的面向对象特性
+- 设计模式的实际应用场景
+- 代码的可维护性和可扩展性
+
+**📁 完整解决方案**：[Python面向对象高级特性](../../solutions/common/python-oop-advanced.md)
+
+### 高级特性与设计模式 ⚡
+
+#### 题目5：装饰器模式深度应用
+**问题背景**：实现复杂的装饰器系统和中间件架构
+
+**技术挑战**：
+- 带参数装饰器的实现机制
+- 类装饰器和函数装饰器的区别
+- 装饰器链的执行顺序和性能
+- 装饰器在框架中的应用模式
+
+**考察要点**：
+- 装饰器的实现原理和闭包机制
+- 不同类型装饰器的使用场景
+- 装饰器的性能影响和优化策略
+- 在实际项目中的应用经验
+
+**📁 完整解决方案**：[Python装饰器系统实现](../../solutions/common/python-decorators.md)
+
+#### 题目6：生成器与迭代器优化
+**问题背景**：实现高效的数据流处理和内存优化
+
+**技术挑战**：
+- 生成器的内存效率和性能特点
+- 自定义迭代器的实现和优化
+- 异步生成器的使用场景
+- 大数据处理的流式计算
+
+**考察要点**：
+- 迭代协议的深度理解
+- 生成器在内存优化中的作用
+- 惰性计算的设计模式
+- 数据流处理的最佳实践
+
+**📁 完整解决方案**：[Python生成器与迭代器](../../solutions/common/python-generators.md)
+
+## 📊 面试评分标准
+
+### 基础理解 (30分)
+- **语言特性**：深入理解Python的核心机制和设计哲学
+- **数据结构**：熟练掌握内置数据结构的特点和使用场景
+- **语法掌握**：能够编写符合Python规范的高质量代码
+
+### 实践应用 (40分)
+- **问题解决**：能够分析复杂问题并设计有效的解决方案
+- **性能优化**：具备代码性能分析和优化的实战能力
+- **架构设计**：能够设计可维护、可扩展的Python应用架构
+
+### 深度理解 (30分)
+- **原理洞察**：深入理解Python解释器和运行时机制
+- **最佳实践**：掌握Python开发的最佳实践和设计模式
+- **生态系统**：了解Python生态系统和第三方库的使用
+
+## 🎯 备考建议
+
+### 学习路径
+1. **基础巩固**：深入理解Python语言特性和核心机制
+2. **数据结构**：掌握常用数据结构和算法的Python实现
+3. **面向对象**：学习Python的面向对象编程和设计模式
+4. **高级特性**：掌握装饰器、生成器、元类等高级特性
+5. **性能优化**：学习性能分析和优化技巧
+
+### 技术重点
+- **GIL机制**：理解全局解释器锁的影响和优化策略
+- **内存管理**：掌握Python的内存管理和垃圾回收机制
+- **并发编程**：了解多线程、多进程、异步编程的选择
+- **数据结构**：熟练使用和实现各种数据结构
+- **设计模式**：掌握常用设计模式的Python实现
+
+### 实践项目建议
+- 实现高性能缓存系统
+- 开发数据处理工具
+- 构建Web应用框架
+- 创建自动化测试框架
+- 设计API服务系统
+
+## 🔗 相关资源链接
+
+- [Python异步编程面试题](./python-async.md)
+- [Python Web框架面试题](./python-web-frameworks.md)
+- [数据结构与算法面试题](../algorithms/README.md)
+- [面向对象设计面试题](../system-design/README.md)
+- [← 返回后端面试题目录](./README.md)
 
 ---
 
-### 2. 数据结构和算法
-
-#### **【中级】** 实现一个 LRU 缓存，要求 O(1) 时间复杂度
-
-**💡 考察要点:**
-- 数据结构设计
-- 时间复杂度优化
-- Python 实现技巧
-
-```python
-from collections import OrderedDict
-from typing import Optional
-
-class LRUCache:
-    """LRU缓存实现 - 使用OrderedDict"""
-    
-    def __init__(self, capacity: int):
-        self.capacity = capacity
-        self.cache = OrderedDict()
-    
-    def get(self, key: int) -> int:
-        if key in self.cache:
-            # 移动到末尾 (最近使用)
-            self.cache.move_to_end(key)
-            return self.cache[key]
-        return -1
-    
-    def put(self, key: int, value: int) -> None:
-        if key in self.cache:
-            # 更新值并移动到末尾
-            self.cache[key] = value
-            self.cache.move_to_end(key)
-        else:
-            # 新增键值对
-            if len(self.cache) >= self.capacity:
-                # 删除最久未使用的 (第一个)
-                self.cache.popitem(last=False)
-            self.cache[key] = value
-
-# 手动实现双向链表版本
-class Node:
-    def __init__(self, key: int = 0, value: int = 0):
-        self.key = key
-        self.value = value
-        self.prev: Optional[Node] = None
-        self.next: Optional[Node] = None
-
-class LRUCacheManual:
-    """LRU缓存 - 手动实现双向链表"""
-    
-    def __init__(self, capacity: int):
-        self.capacity = capacity
-        self.cache = {}  # key -> node
-        
-        # 创建虚拟头尾节点
-        self.head = Node()
-        self.tail = Node()
-        self.head.next = self.tail
-        self.tail.prev = self.head
-    
-    def _add_node(self, node: Node) -> None:
-        """在头部添加节点"""
-        node.prev = self.head
-        node.next = self.head.next
-        
-        self.head.next.prev = node
-        self.head.next = node
-    
-    def _remove_node(self, node: Node) -> None:
-        """删除节点"""
-        prev_node = node.prev
-        next_node = node.next
-        
-        prev_node.next = next_node
-        next_node.prev = prev_node
-    
-    def _move_to_head(self, node: Node) -> None:
-        """移动节点到头部"""
-        self._remove_node(node)
-        self._add_node(node)
-    
-    def _pop_tail(self) -> Node:
-        """删除尾部节点"""
-        last_node = self.tail.prev
-        self._remove_node(last_node)
-        return last_node
-    
-    def get(self, key: int) -> int:
-        node = self.cache.get(key)
-        if node:
-            # 移动到头部
-            self._move_to_head(node)
-            return node.value
-        return -1
-    
-    def put(self, key: int, value: int) -> None:
-        node = self.cache.get(key)
-        
-        if node:
-            # 更新现有节点
-            node.value = value
-            self._move_to_head(node)
-        else:
-            # 创建新节点
-            new_node = Node(key, value)
-            
-            if len(self.cache) >= self.capacity:
-                # 删除尾部节点
-                tail = self._pop_tail()
-                del self.cache[tail.key]
-            
-            self.cache[key] = new_node
-            self._add_node(new_node)
-
-# 测试LRU缓存
-def test_lru_cache():
-    print("=== LRU缓存测试 ===")
-    
-    lru = LRUCache(2)
-    
-    lru.put(1, 1)
-    lru.put(2, 2)
-    print(f"get(1): {lru.get(1)}")  # 1
-    
-    lru.put(3, 3)  # 删除key=2
-    print(f"get(2): {lru.get(2)}")  # -1
-    
-    lru.put(4, 4)  # 删除key=1
-    print(f"get(1): {lru.get(1)}")  # -1
-    print(f"get(3): {lru.get(3)}")  # 3
-    print(f"get(4): {lru.get(4)}")  # 4
-
-test_lru_cache()
-```
-
----
-
-### 3. 高级特性
-
-#### **【高级】** 装饰器的实现原理，如何创建带参数的装饰器？
-
-**📝 参考答案:**
-
-```python
-import functools
-import time
-from typing import Callable, Any
-
-# 1. 基础装饰器
-def timer(func: Callable) -> Callable:
-    """计时装饰器"""
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        result = func(*args, **kwargs)
-        end = time.time()
-        print(f"{func.__name__} 执行时间: {end - start:.4f}秒")
-        return result
-    return wrapper
-
-# 2. 带参数的装饰器
-def retry(max_attempts: int = 3, delay: float = 1.0):
-    """重试装饰器"""
-    def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            for attempt in range(max_attempts):
-                try:
-                    return func(*args, **kwargs)
-                except Exception as e:
-                    if attempt == max_attempts - 1:
-                        raise e
-                    print(f"第{attempt + 1}次尝试失败: {e}")
-                    time.sleep(delay)
-        return wrapper
-    return decorator
-
-# 3. 类装饰器
-class RateLimiter:
-    """限流装饰器"""
-    def __init__(self, max_calls: int, period: float):
-        self.max_calls = max_calls
-        self.period = period
-        self.calls = []
-    
-    def __call__(self, func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            now = time.time()
-            
-            # 清理过期记录
-            self.calls = [call_time for call_time in self.calls 
-                         if now - call_time < self.period]
-            
-            if len(self.calls) >= self.max_calls:
-                raise Exception(f"Rate limit exceeded: {self.max_calls} calls per {self.period}s")
-            
-            self.calls.append(now)
-            return func(*args, **kwargs)
-        return wrapper
-
-# 4. 属性装饰器
-class cached_property:
-    """缓存属性装饰器"""
-    def __init__(self, func):
-        self.func = func
-        self.__doc__ = func.__doc__
-    
-    def __get__(self, obj, cls):
-        if obj is None:
-            return self
-        
-        # 计算属性值并缓存
-        value = self.func(obj)
-        setattr(obj, self.func.__name__, value)
-        return value
-
-# 使用示例
-@timer
-@retry(max_attempts=3, delay=0.5)
-def unreliable_function():
-    """不稳定的函数"""
-    import random
-    if random.random() < 0.7:
-        raise Exception("随机失败")
-    return "成功执行"
-
-@RateLimiter(max_calls=5, period=10.0)
-def api_call():
-    """API调用"""
-    return "API响应"
-
-class ExpensiveComputation:
-    def __init__(self, data):
-        self.data = data
-    
-    @cached_property
-    def expensive_result(self):
-        """昂贵的计算"""
-        print("执行复杂计算...")
-        time.sleep(1)  # 模拟耗时操作
-        return sum(self.data) ** 2
-
-# 测试装饰器
-print("=== 装饰器测试 ===")
-try:
-    result = unreliable_function()
-    print(f"结果: {result}")
-except Exception as e:
-    print(f"最终失败: {e}")
-
-# 测试限流
-for i in range(7):
-    try:
-        api_call()
-        print(f"API调用 {i+1} 成功")
-    except Exception as e:
-        print(f"API调用 {i+1} 失败: {e}")
-
-# 测试缓存属性
-obj = ExpensiveComputation([1, 2, 3, 4, 5])
-print(f"第一次访问: {obj.expensive_result}")
-print(f"第二次访问: {obj.expensive_result}")  # 从缓存读取
-```
-
----
-
-## 🎯 面试技巧建议
-
-### Python 回答策略
-1. **概念理解**: 先解释基本概念
-2. **代码示例**: 用实际代码演示
-3. **对比分析**: 与其他语言对比
-4. **实践应用**: 结合项目经验
-
-### 常见追问问题
-- "Python2 和 Python3 的主要区别？"
-- "list 和 tuple 的区别？"
-- "深拷贝和浅拷贝的区别？"
-- "Python 的内存管理机制？"
-
-## 🔗 相关链接
-
-- [← 返回后端目录](./README.md)
-- [Python Web框架](./python-web-frameworks.md)
-- [Python 异步编程](./python-async.md)
-- [性能优化](./performance-optimization.md)
-
----
-
-*Python 简洁优雅，但深度理解其特性对高级开发至关重要* 🐍 
+*掌握Python核心技术，构建高效优雅的应用程序* 🐍 

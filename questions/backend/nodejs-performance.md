@@ -1,489 +1,277 @@
-# Node.js 性能优化面试题
+# Node.js性能优化面试题
 
 [← 返回后端面试题目录](./README.md)
 
-## 📋 目录
+## 📚 题目概览
 
-- [内存管理](#内存管理)
-- [性能监控](#性能监控)
-- [代码优化](#代码优化)
-- [并发处理](#并发处理)
-- [实战案例](#实战案例)
+本部分考察Node.js应用的性能优化能力，重点关注事件循环机制、内存管理、并发处理和监控调优等核心技术。
 
-## 🎯 核心知识点
+## 🎯 核心技术考察重点
+
+### 事件循环与异步机制
+- **事件循环原理**：六个阶段的执行机制和优先级
+- **异步I/O模型**：libuv的实现原理和性能特性
+- **回调地狱解决**：Promise、async/await的性能影响
+- **微任务队列**：process.nextTick和Promise的执行顺序
+
+### 内存管理与优化
+- **V8内存模型**：新生代、老生代的垃圾回收机制
+- **内存泄漏检测**：常见内存泄漏场景和检测方法
+- **内存优化策略**：对象池、缓存管理、大对象处理
+- **堆外内存**：Buffer和ArrayBuffer的使用场景
+
+### 并发处理与集群
+- **单线程模型**：事件驱动的并发处理机制
+- **Worker Threads**：CPU密集型任务的处理策略
+- **Cluster模块**：多进程架构的设计和实现
+- **负载均衡**：进程间负载分配和故障恢复
+
+## 📊 知识结构关联图
 
 ```mermaid
-mindmap
-  root((Node.js性能优化))
-    内存管理
-      垃圾回收
-      内存泄漏
-      堆栈优化
-    性能监控
-      APM工具
-      性能指标
-      日志分析
-    代码优化
-      异步优化
-      算法优化
-      资源优化
-    系统优化
-      集群模式
-      负载均衡
-      缓存策略
+graph TB
+    A[Node.js性能优化] --> B[事件循环优化]
+    A --> C[内存管理]
+    A --> D[并发处理]
+    A --> E[I/O优化]
+    
+    B --> B1[宏任务队列]
+    B --> B2[微任务队列]
+    B --> B3[阻塞操作识别]
+    B --> B4[异步编程模式]
+    
+    C --> C1[垃圾回收优化]
+    C --> C2[内存泄漏检测]
+    C --> C3[对象池管理]
+    C --> C4[堆外内存使用]
+    
+    D --> D1[Worker Threads]
+    D --> D2[Cluster集群]
+    D --> D3[进程通信]
+    D --> D4[负载均衡]
+    
+    E --> E1[文件系统优化]
+    E --> E2[网络I/O优化]
+    E --> E3[数据库连接池]
+    E --> E4[缓存策略]
 ```
 
-## 内存管理
+## 📝 核心面试题目
 
-### 💡 初级题目
+### 事件循环机制 [中级]
 
-#### 1. Node.js 的内存结构和垃圾回收机制？
+#### 题目1：Node.js事件循环的六个阶段和执行机制
+**问题背景**：分析一个高并发Web服务的性能瓶颈
 
-**答案要点：**
-- **堆内存**：存储对象和闭包
-- **栈内存**：存储基本类型和函数调用
-- **V8 垃圾回收**：分代回收，新生代和老生代
-- **内存限制**：默认约1.4GB（64位系统）
+**技术挑战**：
+- 事件循环各阶段的执行顺序和特点
+- 宏任务和微任务的优先级处理
+- 阻塞操作对事件循环的影响
+- 异步操作的调度和执行机制
 
-```javascript
-// 内存使用监控
-function getMemoryUsage() {
-    const usage = process.memoryUsage();
-    return {
-        rss: `${Math.round(usage.rss / 1024 / 1024)} MB`,
-        heapTotal: `${Math.round(usage.heapTotal / 1024 / 1024)} MB`,
-        heapUsed: `${Math.round(usage.heapUsed / 1024 / 1024)} MB`,
-        external: `${Math.round(usage.external / 1024 / 1024)} MB`
-    };
-}
+**考察要点**：
+- Timer、I/O callbacks、Idle、Poll、Check、Close callbacks阶段
+- process.nextTick和Promise.resolve的执行时机
+- setImmediate vs setTimeout(0)的区别
+- 事件循环阻塞的识别和解决方法
 
-// 内存泄漏检测
-class MemoryLeakDetector {
-    constructor() {
-        this.baseline = process.memoryUsage();
-        this.samples = [];
-    }
-    
-    sample() {
-        const current = process.memoryUsage();
-        this.samples.push({
-            timestamp: Date.now(),
-            heapUsed: current.heapUsed,
-            rss: current.rss
-        });
-        
-        // 保持最近100个样本
-        if (this.samples.length > 100) {
-            this.samples.shift();
-        }
-    }
-    
-    detectLeak() {
-        if (this.samples.length < 10) return false;
-        
-        const recent = this.samples.slice(-10);
-        const trend = recent.every((sample, index) => {
-            if (index === 0) return true;
-            return sample.heapUsed > recent[index - 1].heapUsed;
-        });
-        
-        return trend;
-    }
-}
-```
+**📁 完整解决方案**：[Node.js事件循环机制详解](../../solutions/common/nodejs-event-loop.md)
 
-### 🔥 中级题目
+#### 题目2：异步编程模式的性能对比和选择
+**问题背景**：优化一个包含大量异步操作的数据处理服务
 
-#### 2. 如何优化 Node.js 应用的内存使用？
+**技术挑战**：
+- 回调函数、Promise、async/await的性能差异
+- 并发控制和错误处理机制
+- 异步操作的内存占用和垃圾回收
+- 异步栈追踪和调试优化
 
-**答案要点：**
-- **对象池**：重用对象减少 GC 压力
-- **流式处理**：处理大文件时使用 Stream
-- **缓存策略**：合理的缓存大小和过期策略
-- **内存监控**：定期监控和分析内存使用
+**考察要点**：
+- 不同异步模式的执行效率对比
+- Promise链和async/await的内存使用
+- 异步并发控制的最佳实践
+- 异步错误处理和异常传播机制
 
-```javascript
-// 对象池实现
-class ObjectPool {
-    constructor(createFn, resetFn, maxSize = 100) {
-        this.createFn = createFn;
-        this.resetFn = resetFn;
-        this.maxSize = maxSize;
-        this.pool = [];
-    }
-    
-    acquire() {
-        if (this.pool.length > 0) {
-            return this.pool.pop();
-        }
-        return this.createFn();
-    }
-    
-    release(obj) {
-        if (this.pool.length < this.maxSize) {
-            this.resetFn(obj);
-            this.pool.push(obj);
-        }
-    }
-}
+**📁 完整解决方案**：[Node.js异步编程优化](../../solutions/common/nodejs-async-optimization.md)
 
-// 流式文件处理
-const fs = require('fs');
-const { Transform } = require('stream');
+### 内存管理优化 [高级]
 
-class DataProcessor extends Transform {
-    constructor(options) {
-        super({ objectMode: true, ...options });
-        this.processedCount = 0;
-    }
-    
-    _transform(chunk, encoding, callback) {
-        try {
-            // 处理数据块
-            const processed = this.processChunk(chunk);
-            this.processedCount++;
-            
-            if (this.processedCount % 1000 === 0) {
-                console.log(`已处理 ${this.processedCount} 条记录`);
-            }
-            
-            callback(null, processed);
-        } catch (error) {
-            callback(error);
-        }
-    }
-    
-    processChunk(chunk) {
-        // 具体的数据处理逻辑
-        return chunk.toString().toUpperCase();
-    }
-}
-```
+#### 题目3：V8垃圾回收机制和内存优化策略
+**问题背景**：解决Node.js应用的内存泄漏和性能问题
 
-## 性能监控
+**技术挑战**：
+- V8堆内存的分代管理机制
+- 垃圾回收的触发条件和性能影响
+- 内存泄漏的常见场景和检测方法
+- 大对象处理和内存优化策略
 
-### 🔥 中级题目
+**考察要点**：
+- 新生代Scavenge和老生代Mark-Sweep算法
+- 内存快照分析和泄漏定位方法
+- 闭包、全局变量、事件监听器的内存管理
+- --max-old-space-size等V8参数调优
 
-#### 3. 如何实现 Node.js 应用性能监控？
+**📁 完整解决方案**：[Node.js内存管理优化](../../solutions/common/nodejs-memory-optimization.md)
 
-**答案要点：**
-- **性能指标**：响应时间、吞吐量、错误率
-- **监控工具**：clinic.js、0x、heapdump
-- **APM 集成**：New Relic、AppDynamics
-- **自定义指标**：业务相关的性能指标
+#### 题目4：Buffer和Stream的性能优化实践
+**问题背景**：优化大文件处理和网络传输的性能
 
-```javascript
-// 性能监控中间件
-class PerformanceMonitor {
-    constructor() {
-        this.metrics = {
-            requests: 0,
-            responses: 0,
-            errors: 0,
-            responseTimes: [],
-            activeConnections: 0
-        };
-    }
-    
-    middleware() {
-        return (req, res, next) => {
-            const start = process.hrtime.bigint();
-            this.metrics.requests++;
-            this.metrics.activeConnections++;
-            
-            res.on('finish', () => {
-                const end = process.hrtime.bigint();
-                const duration = Number(end - start) / 1000000; // 转换为毫秒
-                
-                this.metrics.responses++;
-                this.metrics.responseTimes.push(duration);
-                this.metrics.activeConnections--;
-                
-                if (res.statusCode >= 400) {
-                    this.metrics.errors++;
-                }
-                
-                // 保持最近1000个响应时间
-                if (this.metrics.responseTimes.length > 1000) {
-                    this.metrics.responseTimes.shift();
-                }
-            });
-            
-            next();
-        };
-    }
-    
-    getStats() {
-        const responseTimes = this.metrics.responseTimes;
-        
-        return {
-            requests: this.metrics.requests,
-            responses: this.metrics.responses,
-            errors: this.metrics.errors,
-            errorRate: this.metrics.responses > 0 ? 
-                (this.metrics.errors / this.metrics.responses * 100).toFixed(2) + '%' : '0%',
-            activeConnections: this.metrics.activeConnections,
-            avgResponseTime: responseTimes.length > 0 ? 
-                (responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length).toFixed(2) + 'ms' : '0ms',
-            memory: process.memoryUsage()
-        };
-    }
-}
-```
+**技术挑战**：
+- Buffer的内存分配和回收机制
+- Stream的背压处理和流控制
+- 大文件读写的内存优化策略
+- 网络传输的缓冲区管理
 
-## 代码优化
+**考察要点**：
+- Buffer.allocUnsafe vs Buffer.alloc的性能差异
+- Readable、Writable、Transform流的实现原理
+- 流的背压机制和highWaterMark配置
+- 零拷贝技术和堆外内存的使用
 
-### ⚡ 高级题目
+**📁 完整解决方案**：[Node.js Buffer和Stream优化](../../solutions/common/nodejs-buffer-stream-optimization.md)
 
-#### 4. 如何优化 Node.js 应用的并发处理？
+### 并发处理架构 [高级]
 
-**答案要点：**
-- **集群模式**：利用多核 CPU
-- **工作线程**：CPU 密集型任务
-- **连接池**：数据库连接复用
-- **缓存策略**：减少重复计算
+#### 题目5：Worker Threads和CPU密集型任务优化
+**问题背景**：处理图像处理、数据分析等CPU密集型任务
 
-```javascript
-// 集群模式实现
-const cluster = require('cluster');
-const os = require('os');
+**技术挑战**：
+- Worker Threads的创建和管理策略
+- 主线程和工作线程的通信机制
+- CPU密集型任务的负载均衡
+- 线程池的设计和资源管理
 
-if (cluster.isMaster) {
-    const numWorkers = os.cpus().length;
-    
-    console.log(`主进程 ${process.pid} 启动`);
-    console.log(`启动 ${numWorkers} 个工作进程`);
-    
-    // 启动工作进程
-    for (let i = 0; i < numWorkers; i++) {
-        cluster.fork();
-    }
-    
-    // 监听工作进程退出
-    cluster.on('exit', (worker, code, signal) => {
-        console.log(`工作进程 ${worker.process.pid} 退出`);
-        console.log('启动新的工作进程');
-        cluster.fork();
-    });
-    
-} else {
-    // 工作进程代码
-    const express = require('express');
-    const app = express();
-    
-    app.get('/', (req, res) => {
-        res.json({ 
-            message: 'Hello from worker', 
-            pid: process.pid 
-        });
-    });
-    
-    app.listen(3000, () => {
-        console.log(`工作进程 ${process.pid} 监听端口 3000`);
-    });
-}
+**考察要点**：
+- Worker Threads vs Child Process的选择依据
+- SharedArrayBuffer和MessageChannel的使用
+- 线程间数据传递的序列化开销
+- CPU密集型任务的分片和调度策略
 
-// 工作线程池
-const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
+**📁 完整解决方案**：[Node.js Worker Threads优化](../../solutions/common/nodejs-worker-threads.md)
 
-class WorkerPool {
-    constructor(workerScript, poolSize = os.cpus().length) {
-        this.workerScript = workerScript;
-        this.poolSize = poolSize;
-        this.workers = [];
-        this.queue = [];
-        
-        this.initWorkers();
-    }
-    
-    initWorkers() {
-        for (let i = 0; i < this.poolSize; i++) {
-            this.createWorker();
-        }
-    }
-    
-    createWorker() {
-        const worker = new Worker(this.workerScript);
-        worker.busy = false;
-        
-        worker.on('message', (result) => {
-            worker.busy = false;
-            worker.resolve(result);
-            this.processQueue();
-        });
-        
-        worker.on('error', (error) => {
-            worker.busy = false;
-            worker.reject(error);
-            this.processQueue();
-        });
-        
-        this.workers.push(worker);
-    }
-    
-    execute(data) {
-        return new Promise((resolve, reject) => {
-            const task = { data, resolve, reject };
-            
-            const availableWorker = this.workers.find(w => !w.busy);
-            if (availableWorker) {
-                this.runTask(availableWorker, task);
-            } else {
-                this.queue.push(task);
-            }
-        });
-    }
-    
-    runTask(worker, task) {
-        worker.busy = true;
-        worker.resolve = task.resolve;
-        worker.reject = task.reject;
-        worker.postMessage(task.data);
-    }
-    
-    processQueue() {
-        if (this.queue.length === 0) return;
-        
-        const availableWorker = this.workers.find(w => !w.busy);
-        if (availableWorker) {
-            const task = this.queue.shift();
-            this.runTask(availableWorker, task);
-        }
-    }
-}
-```
+#### 题目6：Cluster集群架构和负载均衡设计
+**问题背景**：设计支持高并发的Node.js集群架构
 
-## 实战案例
+**技术挑战**：
+- 多进程架构的设计和实现
+- 进程间负载分配和故障恢复
+- 共享状态和会话管理
+- 集群监控和自动扩缩容
 
-### ⚡ 高级题目
+**考察要点**：
+- Cluster模块的fork和IPC通信机制
+- Round-robin和操作系统负载均衡策略
+- 进程重启和优雅关闭的实现
+- PM2等进程管理工具的使用
 
-#### 5. 设计一个高性能的文件上传服务
+**📁 完整解决方案**：[Node.js集群架构设计](../../solutions/common/nodejs-cluster-architecture.md)
 
-**答案要点：**
-- **流式上传**：支持大文件分块上传
-- **并发控制**：限制同时上传数量
-- **进度跟踪**：实时上传进度反馈
-- **错误恢复**：支持断点续传
+### I/O性能优化 [中级]
 
-```javascript
-const multer = require('multer');
-const fs = require('fs').promises;
-const path = require('path');
+#### 题目7：文件系统和网络I/O的性能调优
+**问题背景**：优化文件服务和API网关的I/O性能
 
-class HighPerformanceUploadService {
-    constructor(options = {}) {
-        this.uploadDir = options.uploadDir || './uploads';
-        this.maxConcurrent = options.maxConcurrent || 5;
-        this.chunkSize = options.chunkSize || 1024 * 1024; // 1MB
-        
-        this.activeUploads = new Map();
-        this.uploadQueue = [];
-        this.processing = 0;
-    }
-    
-    async handleUpload(req, res) {
-        const { filename, chunkIndex, totalChunks, uploadId } = req.body;
-        
-        try {
-            // 保存分块
-            const chunkPath = path.join(
-                this.uploadDir, 
-                'temp', 
-                `${uploadId}_${chunkIndex}`
-            );
-            
-            await fs.writeFile(chunkPath, req.file.buffer);
-            
-            // 更新上传进度
-            this.updateProgress(uploadId, chunkIndex, totalChunks);
-            
-            // 检查是否所有分块都已上传
-            if (await this.isUploadComplete(uploadId, totalChunks)) {
-                const finalPath = await this.mergeChunks(uploadId, filename, totalChunks);
-                res.json({ 
-                    status: 'completed', 
-                    path: finalPath 
-                });
-            } else {
-                res.json({ 
-                    status: 'uploading', 
-                    progress: this.getProgress(uploadId) 
-                });
-            }
-            
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
-    
-    async mergeChunks(uploadId, filename, totalChunks) {
-        const finalPath = path.join(this.uploadDir, filename);
-        const writeStream = require('fs').createWriteStream(finalPath);
-        
-        for (let i = 0; i < totalChunks; i++) {
-            const chunkPath = path.join(
-                this.uploadDir, 
-                'temp', 
-                `${uploadId}_${i}`
-            );
-            
-            const chunkData = await fs.readFile(chunkPath);
-            writeStream.write(chunkData);
-            
-            // 删除临时分块文件
-            await fs.unlink(chunkPath);
-        }
-        
-        writeStream.end();
-        return finalPath;
-    }
-    
-    updateProgress(uploadId, chunkIndex, totalChunks) {
-        if (!this.activeUploads.has(uploadId)) {
-            this.activeUploads.set(uploadId, new Set());
-        }
-        
-        this.activeUploads.get(uploadId).add(chunkIndex);
-    }
-    
-    getProgress(uploadId) {
-        const chunks = this.activeUploads.get(uploadId);
-        return chunks ? chunks.size : 0;
-    }
-    
-    async isUploadComplete(uploadId, totalChunks) {
-        const chunks = this.activeUploads.get(uploadId);
-        return chunks && chunks.size === totalChunks;
-    }
-}
+**技术挑战**：
+- 文件系统操作的异步优化
+- 网络连接的复用和管理
+- I/O密集型应用的性能瓶颈
+- 缓存策略和数据预取
 
-// 使用示例
-const express = require('express');
-const app = express();
+**考察要点**：
+- fs.promises vs fs callback的性能对比
+- HTTP Keep-Alive和连接池的配置
+- 文件描述符的管理和限制
+- 缓存层次的设计和实现
 
-const uploadService = new HighPerformanceUploadService({
-    uploadDir: './uploads',
-    maxConcurrent: 3
-});
+**📁 完整解决方案**：[Node.js I/O性能优化](../../solutions/common/nodejs-io-optimization.md)
 
-const upload = multer({ storage: multer.memoryStorage() });
+#### 题目8：数据库连接池和查询优化
+**问题背景**：优化数据库密集型应用的性能
 
-app.post('/upload/chunk', upload.single('chunk'), (req, res) => {
-    uploadService.handleUpload(req, res);
-});
+**技术挑战**：
+- 数据库连接池的配置和管理
+- 查询并发控制和超时处理
+- 数据库事务的性能优化
+- ORM和原生查询的性能对比
 
-app.listen(3000, () => {
-    console.log('文件上传服务启动在端口 3000');
-});
-```
+**考察要点**：
+- 连接池大小和超时配置的调优
+- 数据库查询的批量处理和缓存
+- 事务隔离级别和锁机制的影响
+- 数据库监控和慢查询分析
 
-## 🔗 相关链接
+**📁 完整解决方案**：[Node.js数据库优化策略](../../solutions/common/nodejs-database-optimization.md)
 
-- [← 返回后端面试题目录](./README.md)
-- [Node.js 基础面试题](./nodejs-basics.md)
-- [Express 框架面试题](./nodejs-express.md)
+### 监控与调试 [高级]
+
+#### 题目9：Node.js应用的性能监控和调试
+**问题背景**：建立完善的Node.js应用监控体系
+
+**技术挑战**：
+- 性能指标的收集和分析
+- 内存泄漏和CPU使用的监控
+- 分布式追踪和日志聚合
+- 性能瓶颈的自动检测和告警
+
+**考察要点**：
+- clinic.js、0x等性能分析工具的使用
+- 内存快照和CPU火焰图的分析
+- APM工具的集成和配置
+- 性能基线和异常检测机制
+
+**📁 完整解决方案**：[Node.js性能监控体系](../../solutions/common/nodejs-performance-monitoring.md)
+
+#### 题目10：生产环境的性能调优和故障排查
+**问题背景**：解决生产环境中的性能问题和稳定性问题
+
+**技术挑战**：
+- 生产环境的性能分析方法
+- 零停机的性能优化部署
+- 故障快速定位和恢复
+- 性能回归的预防和检测
+
+**考察要点**：
+- 生产环境的安全性能分析方法
+- 蓝绿部署和灰度发布策略
+- 故障预案和自动恢复机制
+- 性能基准测试和回归检测
+
+**📁 完整解决方案**：[Node.js生产环境调优](../../solutions/common/nodejs-production-tuning.md)
+
+## 📊 面试评分标准
+
+### 基础知识 (30分)
+- Node.js事件循环和异步机制的理解
+- V8引擎和内存管理的掌握程度
+- 并发处理模型的熟悉程度
+
+### 技术深度 (40分)
+- 性能瓶颈识别和优化能力
+- 内存泄漏检测和解决技能
+- 集群架构设计和实现能力
+
+### 实践能力 (30分)
+- 生产环境性能调优经验
+- 监控体系建设和故障排查能力
+- 性能测试和基准分析技能
+
+## 🎯 备考建议
+
+### 理论学习路径
+1. **事件循环机制**：深入理解Node.js的核心执行模型
+2. **内存管理**：掌握V8垃圾回收和内存优化策略
+3. **并发处理**：学习多进程、多线程的设计模式
+4. **I/O优化**：了解文件系统、网络、数据库的优化方法
+
+### 实践项目建议
+1. **性能测试**：对Node.js应用进行全面的性能基准测试
+2. **内存分析**：使用工具分析和解决内存泄漏问题
+3. **集群部署**：实现高可用的Node.js集群架构
+4. **监控系统**：建立完整的性能监控和告警体系
+
+## 🔗 相关资源链接
+
+- [Node.js基础面试题](./nodejs-basics.md)
+- [Node.js Express框架](./nodejs-express.md)
 - [性能优化通用策略](./performance-optimization.md)
-
----
-
-*专注于 Node.js 性能优化的深度理解和实践应用* 🚀 
+- [监控调试最佳实践](./monitoring-debugging.md) 

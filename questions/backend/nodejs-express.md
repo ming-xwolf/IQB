@@ -1,451 +1,277 @@
-# Express 框架面试题
+# Node.js Express框架面试题
 
 [← 返回后端面试题目录](./README.md)
 
-## 🎯 核心知识点
+## 📚 题目概览
 
-- Express 基础架构
-- 中间件 (Middleware)
-- 路由系统
-- 请求和响应对象
-- 错误处理
-- 模板引擎
-- 静态文件服务
-- 会话管理
+本部分考察Express.js框架的深度理解和应用能力，重点关注中间件机制、路由设计、性能优化和企业级应用开发。
 
-## 📊 Express 请求处理流程
+## 🎯 核心技术考察重点
+
+### Express框架架构
+- **中间件机制**：中间件栈的执行流程和设计原理
+- **路由系统**：路由匹配算法和参数处理机制
+- **请求响应处理**：req/res对象的扩展和生命周期
+- **错误处理**：异常捕获和错误处理中间件
+
+### 高级特性应用
+- **模板引擎集成**：EJS、Pug等模板引擎的性能对比
+- **静态文件服务**：静态资源的缓存和优化策略
+- **会话管理**：Session和Cookie的安全处理
+- **安全防护**：CSRF、XSS、CORS等安全中间件
+
+### 性能优化策略
+- **中间件优化**：中间件顺序和性能调优
+- **缓存策略**：HTTP缓存和应用层缓存
+- **压缩优化**：Gzip压缩和资源优化
+- **集群部署**：多实例部署和负载均衡
+
+## 📊 知识结构关联图
 
 ```mermaid
-flowchart TD
-    A[HTTP请求] --> B[Express应用]
-    B --> C[全局中间件]
-    C --> D[路由匹配]
-    D --> E[路由中间件]
-    E --> F[路由处理器]
-    F --> G[响应发送]
-    G --> H[HTTP响应]
+graph TB
+    A[Express框架] --> B[核心架构]
+    A --> C[中间件系统]
+    A --> D[路由机制]
+    A --> E[性能优化]
     
-    subgraph "中间件栈"
-        C
-        E
-    end
+    B --> B1[应用实例]
+    B --> B2[请求响应]
+    B --> B3[错误处理]
+    B --> B4[生命周期]
     
-    subgraph "路由层"
-        D
-        F
-    end
+    C --> C1[内置中间件]
+    C --> C2[第三方中间件]
+    C --> C3[自定义中间件]
+    C --> C4[中间件栈]
+    
+    D --> D1[路由匹配]
+    D --> D2[参数解析]
+    D --> D3[路由组织]
+    D --> D4[RESTful设计]
+    
+    E --> E1[缓存策略]
+    E --> E2[压缩优化]
+    E --> E3[静态资源]
+    E --> E4[集群部署]
 ```
 
-## 💡 面试题目
-
-### **初级题目**
-
-#### 1. Express是什么？它的主要特点是什么？
-
-**答案要点：**
-- Express是Node.js的轻量级Web框架
-- 主要特点：
-  - 简洁灵活的API
-  - 强大的中间件系统
-  - 路由系统
-  - 模板引擎支持
-  - 静态文件服务
-  - 错误处理机制
-
-#### 2. 什么是Express中间件？如何使用？
-
-**答案要点：**
-- 中间件是处理HTTP请求的函数
-- 可以访问请求对象(req)、响应对象(res)和下一个中间件(next)
-- 执行顺序：按注册顺序执行
-
-```javascript
-const express = require('express');
-const app = express();
-
-// 应用级中间件
-app.use((req, res, next) => {
-    console.log('请求时间:', Date.now());
-    next();
-});
-
-// 路由级中间件
-app.get('/users/:id', (req, res, next) => {
-    console.log('用户ID:', req.params.id);
-    next();
-}, (req, res) => {
-    res.send('用户信息');
-});
-```
-
-#### 3. Express中的路由是如何工作的？
-
-**答案要点：**
-- 路由定义了应用如何响应客户端请求
-- 由HTTP方法、路径和处理函数组成
-- 支持路径参数、查询参数
-
-```javascript
-// 基本路由
-app.get('/', (req, res) => res.send('主页'));
-app.post('/users', (req, res) => res.send('创建用户'));
-
-// 路径参数
-app.get('/users/:id', (req, res) => {
-    res.send(`用户ID: ${req.params.id}`);
-});
-
-// 查询参数
-app.get('/search', (req, res) => {
-    res.send(`搜索: ${req.query.q}`);
-});
-```
-
-### **中级题目**
-
-#### 4. 解释Express中不同类型的中间件
-
-**答案要点：**
-- **应用级中间件**: 绑定到app对象
-- **路由级中间件**: 绑定到express.Router()
-- **错误处理中间件**: 四个参数(err, req, res, next)
-- **内置中间件**: express.static, express.json等
-- **第三方中间件**: body-parser, cors等
-
-```javascript
-// 应用级中间件
-app.use(express.json());
-
-// 路由级中间件
-const router = express.Router();
-router.use((req, res, next) => {
-    console.log('路由中间件');
-    next();
-});
-
-// 错误处理中间件
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('服务器错误');
-});
-```
-
-#### 5. 如何在Express中处理错误？
-
-**答案要点：**
-- 同步错误：自动捕获
-- 异步错误：需要调用next(err)
-- 错误处理中间件：四个参数
-- 错误处理最佳实践
-
-```javascript
-// 异步错误处理
-app.get('/async-error', async (req, res, next) => {
-    try {
-        const result = await someAsyncOperation();
-        res.json(result);
-    } catch (error) {
-        next(error); // 传递给错误处理中间件
-    }
-});
-
-// 错误处理中间件
-app.use((err, req, res, next) => {
-    if (err instanceof CustomError) {
-        res.status(err.statusCode).json({ error: err.message });
-    } else {
-        res.status(500).json({ error: '内部服务器错误' });
-    }
-});
-```
-
-#### 6. Express中的req和res对象有哪些常用方法？
-
-**答案要点：**
-- **req对象**：
-  - `req.params`, `req.query`, `req.body`
-  - `req.headers`, `req.cookies`
-  - `req.method`, `req.url`, `req.path`
-  
-- **res对象**：
-  - `res.send()`, `res.json()`, `res.status()`
-  - `res.cookie()`, `res.redirect()`
-  - `res.render()`, `res.sendFile()`
-
-### **高级题目**
-
-#### 7. 如何实现Express应用的性能优化？
-
-**答案要点：**
-- 启用Gzip压缩
-- 使用缓存策略
-- 优化中间件顺序
-- 数据库连接池
-- 静态资源优化
-
-```javascript
-const compression = require('compression');
-const helmet = require('helmet');
-
-// 安全中间件
-app.use(helmet());
-
-// 压缩中间件
-app.use(compression());
-
-// 缓存静态文件
-app.use(express.static('public', {
-    maxAge: '1d',
-    etag: false
-}));
-```
-
-#### 8. 如何实现Express应用的身份验证？
-
-**答案要点：**
-- JWT认证
-- Session认证
-- OAuth认证
-- 中间件实现认证检查
-
-```javascript
-const jwt = require('jsonwebtoken');
-
-// JWT认证中间件
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    
-    if (!token) {
-        return res.sendStatus(401);
-    }
-    
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403);
-        req.user = user;
-        next();
-    });
-};
-
-// 受保护的路由
-app.get('/protected', authenticateToken, (req, res) => {
-    res.json({ message: '受保护的资源', user: req.user });
-});
-```
-
-#### 9. 如何实现Express应用的测试？
-
-**答案要点：**
-- 单元测试：测试单个函数
-- 集成测试：测试API端点
-- 使用测试框架：Jest, Mocha
-- 使用Supertest进行HTTP测试
-
-```javascript
-const request = require('supertest');
-const app = require('../app');
-
-describe('GET /users', () => {
-    it('should return users list', async () => {
-        const response = await request(app)
-            .get('/users')
-            .expect(200);
-            
-        expect(response.body).toHaveProperty('users');
-        expect(Array.isArray(response.body.users)).toBe(true);
-    });
-});
-```
-
-### **实战题目**
-
-#### 10. 实现一个完整的RESTful API
-
-```javascript
-const express = require('express');
-const app = express();
-
-app.use(express.json());
-
-// 模拟数据库
-let users = [
-    { id: 1, name: '张三', email: 'zhang@example.com' },
-    { id: 2, name: '李四', email: 'li@example.com' }
-];
-
-// GET /users - 获取所有用户
-app.get('/users', (req, res) => {
-    res.json({ users, total: users.length });
-});
-
-// GET /users/:id - 获取单个用户
-app.get('/users/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const user = users.find(u => u.id === id);
-    
-    if (!user) {
-        return res.status(404).json({ error: '用户不存在' });
-    }
-    
-    res.json(user);
-});
-
-// POST /users - 创建用户
-app.post('/users', (req, res) => {
-    const { name, email } = req.body;
-    
-    if (!name || !email) {
-        return res.status(400).json({ error: '姓名和邮箱是必需的' });
-    }
-    
-    const newUser = {
-        id: users.length + 1,
-        name,
-        email
-    };
-    
-    users.push(newUser);
-    res.status(201).json(newUser);
-});
-
-// PUT /users/:id - 更新用户
-app.put('/users/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const userIndex = users.findIndex(u => u.id === id);
-    
-    if (userIndex === -1) {
-        return res.status(404).json({ error: '用户不存在' });
-    }
-    
-    users[userIndex] = { ...users[userIndex], ...req.body };
-    res.json(users[userIndex]);
-});
-
-// DELETE /users/:id - 删除用户
-app.delete('/users/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const userIndex = users.findIndex(u => u.id === id);
-    
-    if (userIndex === -1) {
-        return res.status(404).json({ error: '用户不存在' });
-    }
-    
-    users.splice(userIndex, 1);
-    res.status(204).send();
-});
-
-module.exports = app;
-```
-
-#### 11. 实现文件上传功能
-
-```javascript
-const multer = require('multer');
-const path = require('path');
-
-// 配置multer
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({ 
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|gif/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-        
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb(new Error('只允许上传图片文件'));
-        }
-    }
-});
-
-// 单文件上传
-app.post('/upload', upload.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: '没有选择文件' });
-    }
-    
-    res.json({
-        message: '文件上传成功',
-        filename: req.file.filename,
-        originalname: req.file.originalname,
-        size: req.file.size
-    });
-});
-
-// 多文件上传
-app.post('/upload-multiple', upload.array('files', 5), (req, res) => {
-    if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ error: '没有选择文件' });
-    }
-    
-    const fileInfo = req.files.map(file => ({
-        filename: file.filename,
-        originalname: file.originalname,
-        size: file.size
-    }));
-    
-    res.json({
-        message: '文件上传成功',
-        files: fileInfo
-    });
-});
-```
-
-## 🔗 扩展学习
-
-### Express生态系统
-
-```mermaid
-mindmap
-  root((Express生态))
-    中间件
-      body-parser
-      cors
-      helmet
-      morgan
-    模板引擎
-      EJS
-      Pug
-      Handlebars
-    认证
-      passport
-      jsonwebtoken
-    数据库
-      mongoose
-      sequelize
-    测试
-      supertest
-      chai-http
-```
-
-### 相关主题
-- [Node.js 基础面试题](./nodejs-basics.md)
-- [Node.js 性能优化](./nodejs-performance.md)
-- [Web安全面试题](./web-security.md)
-- [API设计面试题](./api-design.md)
-
-## 📚 推荐资源
-
-### 官方文档
-- [Express 官方文档](https://expressjs.com/)
-- [Express中间件指南](https://expressjs.com/en/guide/using-middleware.html)
-
-### 学习材料
-- 《Express实战》
-- [Express最佳实践](https://expressjs.com/en/advanced/best-practice-security.html)
-
----
-
-*掌握Express框架，构建高效的Web应用* 🚀 
+## 📝 核心面试题目
+
+### Express基础架构 [中级]
+
+#### 题目1：Express中间件机制的设计原理和执行流程
+**问题背景**：设计一个支持插件化的Web应用框架
+
+**技术挑战**：
+- 中间件栈的执行顺序和控制流程
+- next()函数的实现机制和错误传播
+- 中间件的异步处理和错误捕获
+- 中间件的性能影响和优化策略
+
+**考察要点**：
+- 中间件函数的签名和执行模式
+- 错误处理中间件的特殊处理机制
+- 中间件的挂载方式和作用域
+- 中间件栈的内部实现原理
+
+**📁 完整解决方案**：[Express中间件机制实现](../../solutions/common/express-middleware-system.md)
+
+#### 题目2：Express路由系统的设计和RESTful API实现
+**问题背景**：构建一个标准的RESTful API服务
+
+**技术挑战**：
+- 路由匹配算法的实现和性能
+- 路径参数和查询参数的处理
+- 路由模块化和组织策略
+- API版本控制和向后兼容
+
+**考察要点**：
+- Router类的实现原理和层级结构
+- 路由参数的解析和验证机制
+- HTTP方法的处理和路由优先级
+- 路由中间件的应用和作用域
+
+**📁 完整解决方案**：[Express路由系统设计](../../solutions/common/express-routing-system.md)
+
+### 企业级应用开发 [高级]
+
+#### 题目3：Express应用的安全防护和最佳实践
+**问题背景**：构建安全可靠的企业级Web应用
+
+**技术挑战**：
+- 常见Web攻击的防护机制
+- 认证授权系统的设计和实现
+- 数据验证和输入过滤
+- 安全头设置和HTTPS配置
+
+**考察要点**：
+- helmet.js等安全中间件的使用
+- CSRF攻击的防护策略和实现
+- XSS防护和内容安全策略
+- 会话安全和JWT token管理
+
+**📁 完整解决方案**：[Express安全防护体系](../../solutions/common/express-security-practices.md)
+
+#### 题目4：Express应用的错误处理和日志管理
+**问题背景**：建立完善的错误处理和监控体系
+
+**技术挑战**：
+- 统一错误处理机制的设计
+- 异步错误的捕获和处理
+- 日志分级和结构化日志
+- 错误监控和告警机制
+
+**考察要点**：
+- 错误处理中间件的实现原理
+- Promise和async/await的错误处理
+- 日志中间件的设计和性能优化
+- 错误追踪和调试信息的收集
+
+**📁 完整解决方案**：[Express错误处理系统](../../solutions/common/express-error-handling.md)
+
+### 性能优化实践 [高级]
+
+#### 题目5：Express应用的性能监控和调优
+**问题背景**：优化高并发场景下的Express应用性能
+
+**技术挑战**：
+- 性能瓶颈的识别和分析
+- 中间件性能优化策略
+- 内存使用和垃圾回收优化
+- 数据库查询和缓存优化
+
+**考察要点**：
+- 性能监控中间件的实现
+- 响应时间和吞吐量的测量
+- 内存泄漏的检测和预防
+- 缓存策略的设计和实现
+
+**📁 完整解决方案**：[Express性能优化实践](../../solutions/common/express-performance-optimization.md)
+
+#### 题目6：Express应用的缓存策略和静态资源优化
+**问题背景**：优化Web应用的加载速度和用户体验
+
+**技术挑战**：
+- HTTP缓存头的设置和管理
+- 静态资源的压缩和优化
+- CDN集成和缓存策略
+- 动态内容的缓存机制
+
+**考察要点**：
+- Cache-Control、ETag等缓存机制
+- Gzip压缩和资源合并策略
+- 静态文件服务的性能优化
+- Redis等缓存中间件的集成
+
+**📁 完整解决方案**：[Express缓存优化策略](../../solutions/common/express-caching-optimization.md)
+
+### 微服务架构 [高级]
+
+#### 题目7：Express在微服务架构中的应用和设计
+**问题背景**：基于Express构建微服务架构
+
+**技术挑战**：
+- 服务间通信和API网关设计
+- 服务发现和负载均衡
+- 分布式追踪和监控
+- 服务容错和降级机制
+
+**考察要点**：
+- RESTful API和GraphQL的设计
+- 服务注册和健康检查机制
+- 分布式日志和链路追踪
+- 断路器和限流策略的实现
+
+**📁 完整解决方案**：[Express微服务架构设计](../../solutions/common/express-microservices-architecture.md)
+
+#### 题目8：Express应用的容器化部署和DevOps实践
+**问题背景**：实现Express应用的自动化部署和运维
+
+**技术挑战**：
+- Docker容器化和镜像优化
+- Kubernetes部署和服务编排
+- CI/CD流水线的设计和实现
+- 监控告警和日志聚合
+
+**考察要点**：
+- Dockerfile的优化和多阶段构建
+- Kubernetes资源配置和扩缩容
+- 健康检查和滚动更新策略
+- Prometheus监控和Grafana可视化
+
+**📁 完整解决方案**：[Express容器化部署实践](../../solutions/common/express-containerization-deployment.md)
+
+### 高级特性应用 [中级]
+
+#### 题目9：Express模板引擎集成和服务端渲染
+**问题背景**：实现高性能的服务端渲染应用
+
+**技术挑战**：
+- 模板引擎的选择和性能对比
+- 模板缓存和编译优化
+- 数据绑定和组件化设计
+- SEO优化和首屏渲染
+
+**考察要点**：
+- EJS、Pug、Handlebars等引擎特点
+- 模板继承和局部模板的使用
+- 模板安全和XSS防护
+- 服务端渲染的性能优化
+
+**📁 完整解决方案**：[Express模板引擎优化](../../solutions/common/express-template-optimization.md)
+
+#### 题目10：Express中间件生态和自定义中间件开发
+**问题背景**：开发可复用的Express中间件组件
+
+**技术挑战**：
+- 中间件的设计模式和最佳实践
+- 中间件的配置和参数化
+- 中间件的测试和文档编写
+- 中间件的发布和版本管理
+
+**考察要点**：
+- 中间件的函数式设计和闭包应用
+- 中间件的错误处理和异常传播
+- 中间件的性能监控和调试
+- 中间件生态的贡献和维护
+
+**📁 完整解决方案**：[Express中间件开发指南](../../solutions/common/express-middleware-development.md)
+
+## 📊 面试评分标准
+
+### 基础知识 (30分)
+- Express框架的核心概念和架构理解
+- 中间件机制和路由系统的掌握程度
+- HTTP协议和Web开发基础的熟悉程度
+
+### 技术深度 (40分)
+- 框架内部机制的深入理解
+- 性能优化和安全防护的实践能力
+- 企业级应用开发的架构设计能力
+
+### 实践能力 (30分)
+- 项目开发和部署经验
+- 问题诊断和调试能力
+- 团队协作和技术分享能力
+
+## 🎯 备考建议
+
+### 理论学习路径
+1. **框架基础**：掌握Express的核心概念和基本用法
+2. **中间件系统**：深入理解中间件的设计原理和实现机制
+3. **性能优化**：学习Web应用的性能调优策略
+4. **安全实践**：了解Web安全防护的最佳实践
+
+### 实践项目建议
+1. **RESTful API**：开发完整的API服务和文档
+2. **中间件开发**：编写可复用的Express中间件
+3. **性能测试**：对Express应用进行性能基准测试
+4. **部署实践**：实现自动化部署和监控体系
+
+## 🔗 相关资源链接
+
+- [Node.js基础面试题](./nodejs-basics.md)
+- [Node.js性能优化](./nodejs-performance.md)
+- [API设计最佳实践](./api-design.md)
+- [Web安全防护策略](./web-security.md) 

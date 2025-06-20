@@ -1,616 +1,250 @@
-# Java 基础面试题
+# Java基础面试题
 
-## 🏷️ 标签
-- 技术栈: Java
-- 难度: 初级到中级
-- 类型: 概念题, 编程题, 原理题
+[← 返回后端面试题目录](./README.md)
 
-## 📋 题目描述
+## 📚 题目概览
 
-本文包含 Java 基础知识相关的常见面试题，涵盖语法特性、JVM 原理、集合框架、异常处理等核心概念。
+Java作为企业级开发的主流语言，其基础知识的掌握程度直接影响开发效率和代码质量。本章节重点考察候选人对Java核心特性的理解，包括面向对象编程、JVM机制、集合框架等基础知识，以及在实际开发中的应用能力。
 
-## 💡 核心知识点
-- 面向对象编程 (OOP)
-- JVM 内存模型和垃圾回收
-- 集合框架 (Collections Framework)
-- 异常处理机制
-- I/O 流操作
-- 反射和注解
+## 🎯 核心技术考察重点
 
-## 📊 Java 核心技术体系
+### 面向对象编程基础
+- 封装、继承、多态、抽象四大特性的理解和应用
+- 类与对象的设计原则和最佳实践
+- 接口与抽象类的区别和使用场景
+- 设计模式在Java中的实现
 
-```mermaid
-graph TB
-    Java[Java技术体系] --> Lang[语言特性]
-    Java --> JVM[虚拟机]
-    Java --> API[核心API]
-    Java --> Tools[开发工具]
-    
-    Lang --> OOP[面向对象]
-    Lang --> Generic[泛型]
-    Lang --> Lambda[Lambda表达式]
-    Lang --> Stream[Stream API]
-    
-    JVM --> Memory[内存模型]
-    JVM --> GC[垃圾回收]
-    JVM --> ClassLoader[类加载]
-    
-    API --> Collections[集合框架]
-    API --> IO[IO流]
-    API --> Concurrent[并发包]
-    API --> Reflect[反射]
-    
-    subgraph "核心特性"
-        OOP
-        Generic
-        Collections
-        Memory
-    end
-```
+### JVM虚拟机机制
+- JVM内存模型和垃圾回收机制
+- 类加载过程和双亲委派模型
+- JVM性能调优和监控工具
+- 字节码执行和即时编译原理
 
-## 📝 面试题目
+### 集合框架与数据结构
+- List、Set、Map接口的实现类特点
+- 集合类的性能特点和选择策略
+- 并发集合类的使用和原理
+- 自定义集合类的设计和实现
 
-### 1. 面向对象基础
+### 异常处理与I/O操作
+- 异常处理机制和最佳实践
+- 检查异常与运行时异常的区别
+- I/O流的分类和使用场景
+- NIO与传统I/O的性能对比
 
-#### **【初级】** 解释 Java 中的四大基本特性
-
-**💡 考察要点:**
-- 面向对象编程的核心概念
-- 各特性的实际应用
-- 与其他编程范式的区别
-
-**📝 参考答案:**
-
-Java 面向对象的四大特性：
-
-1. **封装 (Encapsulation)**
-   - 将数据和操作数据的方法绑定在一起
-   - 通过访问修饰符控制访问权限
-   - 隐藏内部实现细节
-
-```java
-public class Student {
-    private String name;        // 私有属性
-    private int age;
-    
-    // 公共方法提供访问接口
-    public String getName() {
-        return name;
-    }
-    
-    public void setAge(int age) {
-        if (age > 0 && age < 120) {  // 数据验证
-            this.age = age;
-        }
-    }
-}
-```
-
-2. **继承 (Inheritance)**
-   - 子类获得父类的属性和方法
-   - 实现代码复用
-   - 建立类之间的层次关系
-
-```java
-public class Animal {
-    protected String name;
-    
-    public void eat() {
-        System.out.println(name + " is eating");
-    }
-}
-
-public class Dog extends Animal {
-    public void bark() {
-        System.out.println(name + " is barking");
-    }
-    
-    @Override
-    public void eat() {
-        System.out.println(name + " is eating dog food");
-    }
-}
-```
-
-3. **多态 (Polymorphism)**
-   - 同一接口的不同实现
-   - 运行时动态绑定
-   - 提高代码灵活性
-
-```java
-public interface Shape {
-    double getArea();
-}
-
-public class Circle implements Shape {
-    private double radius;
-    
-    @Override
-    public double getArea() {
-        return Math.PI * radius * radius;
-    }
-}
-
-public class Rectangle implements Shape {
-    private double width, height;
-    
-    @Override
-    public double getArea() {
-        return width * height;
-    }
-}
-
-// 多态应用
-Shape[] shapes = {new Circle(), new Rectangle()};
-for (Shape shape : shapes) {
-    System.out.println(shape.getArea()); // 运行时确定调用哪个实现
-}
-```
-
-4. **抽象 (Abstraction)**
-   - 抽取共同特征，忽略具体细节
-   - 通过抽象类和接口实现
-   - 定义规范和契约
-
-```java
-public abstract class Vehicle {
-    protected String brand;
-    
-    // 抽象方法，由子类实现
-    public abstract void start();
-    
-    // 具体方法，可被继承
-    public void stop() {
-        System.out.println("Vehicle stopped");
-    }
-}
-```
-
----
-
-#### **【中级】** String、StringBuilder、StringBuffer 的区别和使用场景
-
-**💡 考察要点:**
-- 字符串处理的性能考虑
-- 线程安全性
-- 内存使用效率
-
-**📝 参考答案:**
-
-**主要区别:**
-
-| 特性 | String | StringBuilder | StringBuffer |
-|------|--------|---------------|--------------|
-| 可变性 | 不可变 | 可变 | 可变 |
-| 线程安全 | 安全 | 不安全 | 安全 |
-| 性能 | 低 | 高 | 中等 |
-| 内存开销 | 高 | 低 | 中等 |
-
-**实现原理:**
-
-```java
-// String - 不可变，每次操作创建新对象
-String str = "Hello";
-str += " World";  // 创建新的String对象
-
-// StringBuilder - 可变字符序列
-StringBuilder sb = new StringBuilder("Hello");
-sb.append(" World");  // 在原有基础上修改
-
-// StringBuffer - 线程安全的可变字符序列
-StringBuffer buffer = new StringBuffer("Hello");
-synchronized (buffer) {  // 内部方法都加了synchronized
-    buffer.append(" World");
-}
-```
-
-**性能测试对比:**
-
-```java
-public class StringPerformanceTest {
-    
-    @Test
-    public void testStringConcatenation() {
-        int iterations = 10000;
-        
-        // String 方式 - 性能最差
-        long start = System.currentTimeMillis();
-        String str = "";
-        for (int i = 0; i < iterations; i++) {
-            str += "a";  // 每次创建新对象
-        }
-        System.out.println("String: " + (System.currentTimeMillis() - start) + "ms");
-        
-        // StringBuilder 方式 - 性能最好
-        start = System.currentTimeMillis();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < iterations; i++) {
-            sb.append("a");
-        }
-        String result = sb.toString();
-        System.out.println("StringBuilder: " + (System.currentTimeMillis() - start) + "ms");
-        
-        // StringBuffer 方式 - 中等性能
-        start = System.currentTimeMillis();
-        StringBuffer buffer = new StringBuffer();
-        for (int i = 0; i < iterations; i++) {
-            buffer.append("a");
-        }
-        result = buffer.toString();
-        System.out.println("StringBuffer: " + (System.currentTimeMillis() - start) + "ms");
-    }
-}
-```
-
-**使用场景:**
-- **String**: 字符串不经常变化的场景
-- **StringBuilder**: 单线程环境下频繁字符串操作
-- **StringBuffer**: 多线程环境下需要字符串操作
-
----
-
-### 2. JVM 相关
-
-#### **【中级】** 解释 Java 内存模型和垃圾回收机制
-
-**💡 考察要点:**
-- JVM 内存结构理解
-- 垃圾回收算法原理
-- 性能调优相关知识
+## 📊 知识结构关联图
 
 ```mermaid
 graph TB
-    JVM[JVM内存结构] --> Heap[堆内存]
-    JVM --> NonHeap[非堆内存]
-    JVM --> PC[程序计数器]
-    JVM --> Stack[Java虚拟机栈]
-    JVM --> NativeStack[本地方法栈]
-    
-    Heap --> Young[年轻代]
-    Heap --> Old[老年代]
-    
-    Young --> Eden[Eden区]
-    Young --> S0[Survivor0]
-    Young --> S1[Survivor1]
-    
-    NonHeap --> Method[方法区]
-    NonHeap --> DirectMem[直接内存]
-    
-    subgraph "垃圾回收区域"
-        Young
-        Old
+    subgraph "Java语言基础"
+        A[面向对象] --> B[类与对象]
+        A --> C[继承机制]
+        A --> D[多态实现]
+        E[基本语法] --> F[数据类型]
+        E --> G[控制结构]
+        E --> H[异常处理]
     end
-```
-
-**📝 参考答案:**
-
-**JVM 内存结构:**
-
-1. **堆内存 (Heap)**
-   - **年轻代**: Eden区 + 2个Survivor区
-   - **老年代**: 长时间存活的对象
-   - 垃圾回收的主要区域
-
-2. **非堆内存**
-   - **方法区**: 类信息、常量池、静态变量
-   - **程序计数器**: 当前线程执行的字节码行号
-   - **虚拟机栈**: 方法调用栈帧
-   - **本地方法栈**: Native方法调用
-
-**垃圾回收算法:**
-
-```java
-public class GCExample {
     
-    // 演示对象的生命周期
-    public void demonstrateGC() {
-        // 1. 对象在Eden区创建
-        String temp = new String("temporary");
-        
-        // 2. 短生命周期对象被MinorGC回收
-        temp = null;
-        
-        // 3. 长生命周期对象晋升到老年代
-        List<String> longLived = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
-            longLived.add("String " + i);
-        }
-        
-        // 4. 主动触发GC
-        System.gc();  // 建议JVM进行垃圾回收
-    }
-}
+    subgraph "JVM虚拟机"
+        I[内存模型] --> J[堆内存]
+        I --> K[栈内存]
+        I --> L[方法区]
+        M[垃圾回收] --> N[GC算法]
+        M --> O[GC调优]
+        P[类加载] --> Q[双亲委派]
+        P --> R[自定义加载器]
+    end
+    
+    subgraph "核心API"
+        S[集合框架] --> T[List接口]
+        S --> U[Set接口]
+        S --> V[Map接口]
+        W[并发包] --> X[线程安全集合]
+        W --> Y[原子操作类]
+        Z[I/O系统] --> AA[字节流]
+        Z --> BB[字符流]
+        Z --> CC[NIO]
+    end
+    
+    subgraph "高级特性"
+        DD[泛型] --> EE[类型擦除]
+        DD --> FF[通配符]
+        GG[反射] --> HH[动态代理]
+        GG --> II[注解处理]
+        JJ[Lambda] --> KK[函数式接口]
+        JJ --> LL[Stream API]
+    end
+    
+    A --> I
+    I --> S
+    S --> DD
+    
+    style A fill:#e1f5fe
+    style I fill:#f3e5f5
+    style S fill:#e8f5e8
+    style DD fill:#fff3e0
 ```
 
-**常见垃圾回收器:**
-- **Serial GC**: 单线程收集器
-- **Parallel GC**: 多线程收集器
-- **CMS**: 并发标记清除
-- **G1**: 低延迟垃圾收集器
+## 📝 核心面试题目
 
-**GC 调优参数:**
-```bash
-# 设置堆内存大小
--Xms2g -Xmx4g
+### 面向对象编程 🏗️
 
-# 设置年轻代大小
--Xmn1g
+#### 题目1：Java面向对象四大特性深度解析
+**问题背景**：深入理解Java面向对象编程的核心特性和实际应用
 
-# 选择垃圾回收器
--XX:+UseG1GC
+**技术挑战**：
+- 封装性的访问控制和数据保护机制
+- 继承关系的设计和方法重写策略
+- 多态性的实现原理和动态绑定
+- 抽象类与接口的设计模式应用
 
-# GC日志
--XX:+PrintGC -XX:+PrintGCDetails
-```
+**考察要点**：
+- 面向对象设计原则的深度理解
+- 类继承体系的合理设计能力
+- 多态机制在实际项目中的应用
+- 抽象设计和接口定义的最佳实践
+
+**📁 完整解决方案**：[Java面向对象特性实现](../../solutions/common/java-oop-features.md)
+
+#### 题目2：String类深度分析与性能优化
+**问题背景**：理解String类的不可变性设计和字符串处理的性能优化
+
+**技术挑战**：
+- String不可变性的设计原理和安全考虑
+- String常量池的内存管理机制
+- StringBuilder和StringBuffer的性能对比
+- 字符串处理的最佳实践和性能调优
+
+**考察要点**：
+- 对Java内存模型的深度理解
+- 字符串处理的性能分析能力
+- 线程安全和性能之间的权衡
+- 大量字符串操作的优化策略
+
+**📁 完整解决方案**：[Java字符串处理优化](../../solutions/common/java-string-optimization.md)
+
+### JVM虚拟机机制 ⚙️
+
+#### 题目3：JVM内存模型与垃圾回收深度剖析
+**问题背景**：深入理解JVM内存管理和垃圾回收机制的工作原理
+
+**技术挑战**：
+- 堆内存分代模型的设计原理
+- 不同垃圾回收算法的适用场景
+- 内存泄漏的识别和解决策略
+- JVM参数调优和性能监控
+
+**考察要点**：
+- JVM内存结构的深度理解
+- 垃圾回收算法的原理和选择
+- 内存性能问题的诊断能力
+- 生产环境的JVM调优经验
+
+**📁 完整解决方案**：[JVM内存管理与调优](../../solutions/common/java-jvm-memory.md)
+
+### 集合框架与数据结构 📊
+
+#### 题目4：Java集合框架设计与性能分析
+**问题背景**：深入理解Java集合框架的设计思想和性能特点
+
+**技术挑战**：
+- 不同集合类的底层数据结构实现
+- 集合类的时间复杂度和空间复杂度分析
+- 并发场景下的集合选择和线程安全处理
+- 自定义集合类的设计和实现
+
+**考察要点**：
+- 数据结构和算法的深度理解
+- 集合类性能特点的准确分析
+- 并发编程中的集合使用技巧
+- 根据业务场景选择合适集合的能力
+
+**📁 完整解决方案**：[Java集合框架实现原理](../../solutions/common/java-collections-framework.md)
+
+### 高级特性与应用 ⚡
+
+#### 题目5：Java泛型机制与类型安全
+**问题背景**：理解Java泛型的实现原理和类型安全保证机制
+
+**技术挑战**：
+- 泛型类型擦除的实现原理和限制
+- 通配符的使用场景和边界限定
+- 泛型方法和泛型类的设计模式
+- 泛型在集合框架中的应用
+
+**考察要点**：
+- 泛型机制的深度理解和应用
+- 类型安全编程的最佳实践
+- 复杂泛型场景的设计能力
+- 泛型与反射结合使用的技巧
+
+**📁 完整解决方案**：[Java泛型深度应用](../../solutions/common/java-generics-advanced.md)
+
+#### 题目6：反射机制与动态编程
+**问题背景**：掌握Java反射机制在框架开发中的应用
+
+**技术挑战**：
+- 反射API的使用和性能考虑
+- 动态代理的实现原理和应用场景
+- 注解处理和元数据编程
+- 反射在框架中的设计模式
+
+**考察要点**：
+- 反射机制的深度理解和应用
+- 动态编程的设计思想和实现
+- 框架级编程的技术能力
+- 性能和灵活性的平衡考虑
+
+**📁 完整解决方案**：[Java反射与动态代理](../../solutions/common/java-reflection-proxy.md)
+
+## 📊 面试评分标准
+
+### 基础理解 (30分)
+- **语言特性**：深入理解Java语言的核心特性和设计原理
+- **语法掌握**：熟练掌握Java语法和API的正确使用
+- **概念理解**：准确理解面向对象、JVM、集合等核心概念
+
+### 实践应用 (40分)
+- **问题解决**：能够分析和解决复杂的Java开发问题
+- **代码质量**：编写高质量、可维护的Java代码
+- **性能优化**：具备Java应用性能分析和优化能力
+
+### 深度理解 (30分)
+- **原理洞察**：深入理解JVM、集合框架等底层实现原理
+- **架构设计**：能够进行合理的面向对象设计和架构规划
+- **最佳实践**：掌握Java开发的最佳实践和设计模式
+
+## 🎯 备考建议
+
+### 学习路径
+1. **基础巩固**：深入理解Java语言特性和面向对象编程
+2. **JVM深入**：学习JVM内存模型、垃圾回收和性能调优
+3. **集合框架**：掌握集合类的实现原理和性能特点
+4. **高级特性**：学习泛型、反射、注解等高级特性
+5. **实践应用**：通过项目实践加深理解和应用能力
+
+### 技术重点
+- **面向对象**：深度理解封装、继承、多态、抽象的应用
+- **JVM机制**：掌握内存模型、垃圾回收、类加载等核心机制
+- **集合框架**：熟练使用各种集合类并理解其实现原理
+- **并发编程**：了解Java并发包和线程安全编程
+- **性能优化**：掌握Java应用的性能分析和调优技巧
+
+### 实践项目建议
+- 实现自定义集合类
+- 开发简单的ORM框架
+- 构建基于反射的依赖注入容器
+- 创建内存监控和分析工具
+- 设计高性能缓存系统
+
+## 🔗 相关资源链接
+
+- [Java并发编程面试题](./java-concurrency.md)
+- [Spring框架面试题](./spring-framework.md)
+- [JVM调优面试题](../company-specific/alibaba/java-advanced.md)
+- [设计模式面试题](../system-design/README.md)
+- [← 返回后端面试题目录](./README.md)
 
 ---
 
-### 3. 集合框架
-
-#### **【中级】** HashMap 的实现原理和扩容机制
-
-**💡 考察要点:**
-- 哈希表的实现原理
-- 冲突解决方案
-- 性能特征分析
-
-```mermaid
-graph LR
-    HashMap[HashMap结构] --> Array[数组]
-    Array --> Node1[Node]
-    Array --> Node2[Node]
-    Array --> Node3[Node]
-    
-    Node1 --> LinkedList1[链表]
-    Node2 --> RedBlack[红黑树]
-    Node3 --> LinkedList2[链表]
-    
-    subgraph "当链表长度>=8时"
-        RedBlack
-    end
-```
-
-**📝 参考答案:**
-
-**HashMap 核心实现:**
-
-```java
-public class HashMapExample {
-    
-    // 模拟HashMap的基本结构
-    static class MyHashMap<K, V> {
-        private Node<K, V>[] table;
-        private int size;
-        private static final int DEFAULT_CAPACITY = 16;
-        private static final double LOAD_FACTOR = 0.75;
-        
-        static class Node<K, V> {
-            final int hash;
-            final K key;
-            V value;
-            Node<K, V> next;
-            
-            Node(int hash, K key, V value, Node<K, V> next) {
-                this.hash = hash;
-                this.key = key;
-                this.value = value;
-                this.next = next;
-            }
-        }
-        
-        @SuppressWarnings("unchecked")
-        public MyHashMap() {
-            table = new Node[DEFAULT_CAPACITY];
-        }
-        
-        // 计算hash值
-        private int hash(K key) {
-            if (key == null) return 0;
-            int h = key.hashCode();
-            return h ^ (h >>> 16);  // 高16位与低16位异或
-        }
-        
-        // 获取数组索引
-        private int indexFor(int hash, int length) {
-            return hash & (length - 1);  // 等价于 hash % length
-        }
-        
-        public V put(K key, V value) {
-            int hash = hash(key);
-            int index = indexFor(hash, table.length);
-            
-            // 处理链表
-            for (Node<K, V> e = table[index]; e != null; e = e.next) {
-                if (e.hash == hash && Objects.equals(e.key, key)) {
-                    V oldValue = e.value;
-                    e.value = value;
-                    return oldValue;
-                }
-            }
-            
-            // 添加新节点
-            table[index] = new Node<>(hash, key, value, table[index]);
-            size++;
-            
-            // 检查是否需要扩容
-            if (size >= table.length * LOAD_FACTOR) {
-                resize();
-            }
-            
-            return null;
-        }
-        
-        // 扩容机制
-        @SuppressWarnings("unchecked")
-        private void resize() {
-            Node<K, V>[] oldTable = table;
-            table = new Node[oldTable.length * 2];
-            size = 0;
-            
-            // 重新哈希所有元素
-            for (Node<K, V> head : oldTable) {
-                for (Node<K, V> e = head; e != null; e = e.next) {
-                    put(e.key, e.value);
-                }
-            }
-        }
-    }
-}
-```
-
-**关键特性:**
-1. **哈希冲突解决**: 链地址法（拉链法）
-2. **红黑树优化**: 链表长度≥8时转换为红黑树
-3. **扩容机制**: 负载因子达到0.75时扩容为原来的2倍
-4. **线程不安全**: 多线程环境需要使用ConcurrentHashMap
-
----
-
-### 4. 异常处理
-
-#### **【初级】** Java 异常处理机制和最佳实践
-
-**💡 考察要点:**
-- 异常体系结构
-- 异常处理策略
-- 自定义异常的使用
-
-```mermaid
-graph TB
-    Throwable[Throwable] --> Error[Error]
-    Throwable --> Exception[Exception]
-    
-    Error --> OOM[OutOfMemoryError]
-    Error --> SOE[StackOverflowError]
-    
-    Exception --> RuntimeException[RuntimeException]
-    Exception --> CheckedException[Checked Exception]
-    
-    RuntimeException --> NPE[NullPointerException]
-    RuntimeException --> IAE[IllegalArgumentException]
-    
-    CheckedException --> IOException[IOException]
-    CheckedException --> SQLException[SQLException]
-    
-    subgraph "需要显式处理"
-        CheckedException
-    end
-    
-    subgraph "可选择处理"
-        RuntimeException
-    end
-```
-
-**📝 参考答案:**
-
-**异常处理最佳实践:**
-
-```java
-public class ExceptionHandlingExample {
-    
-    // 1. 具体异常处理
-    public void readFile(String filename) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                processLine(line);
-            }
-        } catch (FileNotFoundException e) {
-            log.error("文件未找到: " + filename, e);
-            throw new BusinessException("文件不存在", e);
-        } catch (IOException e) {
-            log.error("文件读取错误: " + filename, e);
-            throw new BusinessException("文件读取失败", e);
-        }
-    }
-    
-    // 2. 自定义异常
-    public class BusinessException extends Exception {
-        private String errorCode;
-        
-        public BusinessException(String message) {
-            super(message);
-        }
-        
-        public BusinessException(String message, Throwable cause) {
-            super(message, cause);
-        }
-        
-        public BusinessException(String errorCode, String message) {
-            super(message);
-            this.errorCode = errorCode;
-        }
-    }
-    
-    // 3. 异常处理原则
-    public User getUserById(Long id) throws BusinessException {
-        // 参数验证
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException("用户ID不能为空或小于等于0");
-        }
-        
-        try {
-            User user = userRepository.findById(id);
-            if (user == null) {
-                throw new BusinessException("USER_NOT_FOUND", "用户不存在: " + id);
-            }
-            return user;
-        } catch (DataAccessException e) {
-            log.error("数据库访问异常, userId: " + id, e);
-            throw new BusinessException("数据访问失败", e);
-        }
-    }
-    
-    // 4. 全局异常处理
-    @ControllerAdvice
-    public class GlobalExceptionHandler {
-        
-        @ExceptionHandler(BusinessException.class)
-        public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
-            return ResponseEntity.badRequest()
-                .body(new ErrorResponse(e.getErrorCode(), e.getMessage()));
-        }
-        
-        @ExceptionHandler(Exception.class)
-        public ResponseEntity<ErrorResponse> handleGenericException(Exception e) {
-            log.error("未预期的异常", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("INTERNAL_ERROR", "系统内部错误"));
-        }
-    }
-}
-```
-
-**异常处理原则:**
-1. **早抛出，晚捕获**: 在问题发生的地方抛出，在能处理的地方捕获
-2. **不要忽略异常**: 即使是RuntimeException也要适当处理
-3. **异常信息要详细**: 包含足够的上下文信息
-4. **资源清理**: 使用try-with-resources或finally块
-5. **层次化处理**: 不同层次处理不同类型的异常
-
----
-
-## 🎯 面试技巧建议
-
-### 常见面试问题
-1. **基础概念**: "解释一下面向对象的特性"
-2. **性能优化**: "如何优化Java应用的性能？"
-3. **内存管理**: "什么情况下会发生内存泄漏？"
-4. **并发处理**: "多线程环境下如何保证数据安全？"
-
-### 回答技巧
-- **理论+实践**: 既要说清楚原理，也要结合实际使用经验
-- **举例说明**: 用具体的代码示例证明你的理解
-- **对比分析**: 比较不同方案的优缺点
-- **扩展延伸**: 从一个知识点延伸到相关领域
-
-## 🔗 相关链接
-
-- [← 返回后端目录](./README.md)
-- [Spring 框架](./spring-framework.md)
-- [Java 并发编程](./java-concurrency.md)
-- [JVM 调优](./jvm-tuning.md)
-
----
-
-*扎实的 Java 基础是后端开发的根基，深入理解原理才能写出高质量的代码* ☕ 
+*掌握Java核心技术，构建高质量企业级应用* ☕ 

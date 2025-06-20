@@ -1,865 +1,268 @@
-# Web 安全面试题
+# Web安全面试题
 
-## 📋 目录
-- [XSS 跨站脚本攻击](#xss-跨站脚本攻击)
-- [CSRF 跨站请求伪造](#csrf-跨站请求伪造)
-- [SQL 注入攻击](#sql-注入攻击)
-- [身份认证安全](#身份认证安全)
-- [HTTPS 和传输安全](#https-和传输安全)
+[← 返回后端面试题目录](./README.md)
 
-## 🎯 核心知识点
-- Web 安全威胁模型
-- 输入验证和输出编码
-- 安全认证机制
-- 传输层安全
-- 安全编码实践
+## 📚 题目概览
 
-## 📊 Web 安全威胁图
+Web安全是现代Web应用开发中不可忽视的关键领域。随着网络攻击手段的不断演进，开发者需要具备全面的安全防护意识和技术能力。本章节重点考察候选人对常见Web安全威胁的理解、防护机制的掌握，以及在实际项目中的安全实践能力。
 
-```mermaid
-graph TD
-    A[Web 安全威胁] --> B[注入攻击]
-    A --> C[跨站攻击]
-    A --> D[认证漏洞]
-    A --> E[配置错误]
-    
-    B --> B1[SQL 注入]
-    B --> B2[NoSQL 注入]
-    B --> B3[命令注入]
-    
-    C --> C1[XSS]
-    C --> C2[CSRF]
-    C --> C3[SSRF]
-    
-    D --> D1[弱密码]
-    D --> D2[会话劫持]
-    D --> D3[权限提升]
-    
-    E --> E1[默认配置]
-    E --> E2[信息泄露]
-    E --> E3[不安全传输]
-```
+## 🎯 核心技术考察重点
 
-## XSS 跨站脚本攻击
+### Web安全威胁识别
+- 常见Web攻击类型的识别和分析
+- 攻击向量和利用方式的理解
+- 安全漏洞的发现和评估方法
+- 威胁建模和风险评估流程
 
-### 💡 面试题目
+### 安全防护机制
+- 输入验证和输出编码的实现策略
+- 身份认证和授权机制设计
+- 会话管理和状态保护
+- 传输层安全和数据加密
 
-#### 1. **[中级]** XSS 攻击的类型和防护措施
+### 安全编码实践
+- 安全开发生命周期的实施
+- 代码审计和安全测试方法
+- 安全配置和部署策略
+- 监控和应急响应机制
 
-**XSS 攻击类型：**
+### 合规性和标准
+- OWASP Top 10安全风险
+- 行业安全标准和最佳实践
+- 隐私保护和数据合规要求
+- 安全审计和合规性检查
+
+## 📊 知识结构关联图
 
 ```mermaid
 graph TB
-    subgraph "XSS 攻击分类"
-        XSS[XSS 攻击] --> Stored[存储型 XSS]
-        XSS --> Reflected[反射型 XSS]
-        XSS --> DOM[DOM 型 XSS]
+    subgraph "Web安全威胁"
+        A[注入攻击] --> B[SQL注入]
+        A --> C[NoSQL注入]
+        A --> D[命令注入]
+        E[跨站攻击] --> F[XSS攻击]
+        E --> G[CSRF攻击]
+        E --> H[SSRF攻击]
+        I[认证漏洞] --> J[弱密码]
+        I --> K[会话劫持]
+        I --> L[权限提升]
     end
     
-    Stored --> S1[恶意脚本存储在服务器]
-    Stored --> S2[影响所有访问用户]
+    subgraph "防护机制"
+        M[输入验证] --> N[白名单过滤]
+        M --> O[参数绑定]
+        M --> P[类型检查]
+        Q[输出编码] --> R[HTML编码]
+        Q --> S[URL编码]
+        Q --> T[JSON编码]
+        U[访问控制] --> V[身份认证]
+        U --> W[权限授权]
+        U --> X[会话管理]
+    end
     
-    Reflected --> R1[恶意脚本在URL参数中]
-    Reflected --> R2[需要用户点击链接]
+    subgraph "安全实践"
+        Y[安全配置] --> Z[HTTPS配置]
+        Y --> AA[安全头设置]
+        Y --> BB[CSP策略]
+        CC[监控检测] --> DD[日志审计]
+        CC --> EE[入侵检测]
+        CC --> FF[异常监控]
+        GG[应急响应] --> HH[事件处理]
+        GG --> II[漏洞修复]
+        GG --> JJ[安全加固]
+    end
     
-    DOM --> D1[恶意脚本修改DOM]
-    DOM --> D2[在客户端执行]
+    subgraph "合规标准"
+        KK[OWASP] --> LL[Top 10风险]
+        KK --> MM[测试指南]
+        KK --> NN[防护建议]
+        OO[行业标准] --> PP[ISO 27001]
+        OO --> QQ[NIST框架]
+        OO --> RR[PCI DSS]
+    end
+    
+    A --> M
+    E --> Q
+    I --> U
+    M --> Y
+    Q --> CC
+    U --> GG
+    
+    style A fill:#ffebee
+    style E fill:#fce4ec
+    style I fill:#f3e5f5
+    style M fill:#e8f5e8
+    style Q fill:#e1f5fe
+    style U fill:#fff3e0
 ```
 
-**防护措施实现：**
+## 📝 核心面试题目
 
-```python
-# Python Flask XSS 防护示例
-from flask import Flask, request, render_template_string, escape
-import html
-import re
-from markupsafe import Markup
+### 注入攻击防护 💉
 
-app = Flask(__name__)
+#### 题目1：SQL注入攻击防护机制设计
+**问题背景**：深入理解SQL注入攻击的原理和全面的防护策略
 
-# 1. 输出编码防护
-def safe_render(template, **kwargs):
-    """安全渲染模板"""
-    # 对所有变量进行HTML编码
-    safe_kwargs = {}
-    for key, value in kwargs.items():
-        if isinstance(value, str):
-            safe_kwargs[key] = escape(value)
-        else:
-            safe_kwargs[key] = value
-    
-    return render_template_string(template, **safe_kwargs)
+**技术挑战**：
+- SQL注入攻击的各种变种和绕过技术
+- 参数化查询和预编译语句的实现
+- 动态SQL构建的安全策略
+- 数据库层面的安全配置和权限控制
 
-# 2. 输入验证和清理
-class XSSFilter:
-    """XSS 过滤器"""
-    
-    # 危险标签
-    DANGEROUS_TAGS = [
-        'script', 'iframe', 'object', 'embed', 'form',
-        'input', 'textarea', 'button', 'select', 'option'
-    ]
-    
-    # 危险属性
-    DANGEROUS_ATTRS = [
-        'onload', 'onerror', 'onclick', 'onmouseover',
-        'onfocus', 'onblur', 'onchange', 'onsubmit'
-    ]
-    
-    @classmethod
-    def clean_html(cls, content):
-        """清理HTML内容"""
-        if not content:
-            return ""
-        
-        # 移除危险标签
-        for tag in cls.DANGEROUS_TAGS:
-            pattern = re.compile(f'<{tag}[^>]*>.*?</{tag}>', re.IGNORECASE | re.DOTALL)
-            content = pattern.sub('', content)
-            
-            # 移除自闭合标签
-            pattern = re.compile(f'<{tag}[^>]*/?>', re.IGNORECASE)
-            content = pattern.sub('', content)
-        
-        # 移除危险属性
-        for attr in cls.DANGEROUS_ATTRS:
-            pattern = re.compile(f'{attr}\\s*=\\s*["\'][^"\']*["\']', re.IGNORECASE)
-            content = pattern.sub('', content)
-        
-        # 移除javascript协议
-        content = re.sub(r'javascript:', '', content, flags=re.IGNORECASE)
-        
-        return content
-    
-    @classmethod
-    def validate_input(cls, data):
-        """验证输入数据"""
-        if isinstance(data, dict):
-            return {key: cls.clean_html(str(value)) for key, value in data.items()}
-        elif isinstance(data, str):
-            return cls.clean_html(data)
-        else:
-            return data
+**考察要点**：
+- 对SQL注入攻击原理的深度理解
+- 多层次防护策略的设计能力
+- 数据库安全配置的最佳实践
+- 代码审计和安全测试技能
 
-# 3. 内容安全策略 (CSP)
-@app.after_request
-def add_security_headers(response):
-    """添加安全头"""
-    # CSP 策略
-    csp_policy = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
-        "style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' data: https:; "
-        "font-src 'self' https://fonts.gstatic.com; "
-        "connect-src 'self'; "
-        "frame-ancestors 'none';"
-    )
-    
-    response.headers['Content-Security-Policy'] = csp_policy
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    
-    return response
+**📁 完整解决方案**：[SQL注入防护完整实现](../../solutions/common/sql-injection-protection.md)
 
-# 使用示例
-@app.route('/comment', methods=['POST'])
-def add_comment():
-    comment = request.form.get('comment', '')
-    
-    # 输入验证和清理
-    safe_comment = XSSFilter.validate_input(comment)
-    
-    # 存储到数据库（示例）
-    # db.save_comment(safe_comment)
-    
-    return safe_render('''
-    <div class="comment">
-        <h3>您的评论：</h3>
-        <p>{{ comment }}</p>
-    </div>
-    ''', comment=safe_comment)
+#### 题目2：NoSQL注入和命令注入防护
+**问题背景**：掌握现代应用中NoSQL和系统命令注入的防护技术
 
-if __name__ == '__main__':
-    app.run(debug=False)  # 生产环境关闭调试模式
-```
+**技术挑战**：
+- NoSQL数据库的注入攻击向量分析
+- 系统命令执行的安全控制机制
+- 输入验证和参数化的实现策略
+- 容器化环境下的安全隔离
 
-#### 2. **[高级]** DOM XSS 防护和前端安全实践
+**考察要点**：
+- 对新型注入攻击的理解和应对
+- 系统级安全控制的设计能力
+- 容器安全和隔离技术的应用
+- 安全开发流程的建立和执行
 
-**前端 XSS 防护：**
+**📁 完整解决方案**：[现代注入攻击防护](../../solutions/common/modern-injection-protection.md)
 
-```javascript
-// JavaScript XSS 防护工具类
-class XSSProtection {
-    /**
-     * HTML 编码
-     */
-    static htmlEncode(str) {
-        if (!str) return '';
-        
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
-    
-    /**
-     * HTML 解码
-     */
-    static htmlDecode(str) {
-        if (!str) return '';
-        
-        const div = document.createElement('div');
-        div.innerHTML = str;
-        return div.textContent || div.innerText || '';
-    }
-    
-    /**
-     * URL 编码
-     */
-    static urlEncode(str) {
-        return encodeURIComponent(str);
-    }
-    
-    /**
-     * JavaScript 编码
-     */
-    static jsEncode(str) {
-        if (!str) return '';
-        
-        return str.replace(/[\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g, 
-            function(char) {
-                return '\\u' + ('0000' + char.charCodeAt(0).toString(16)).substr(-4);
-            });
-    }
-    
-    /**
-     * 安全的 innerHTML 设置
-     */
-    static safeSetInnerHTML(element, content) {
-        // 使用 DOMPurify 库进行清理（需要引入）
-        if (typeof DOMPurify !== 'undefined') {
-            element.innerHTML = DOMPurify.sanitize(content);
-        } else {
-            // 简单的清理方案
-            element.textContent = content;
-        }
-    }
-    
-    /**
-     * 安全的动态脚本执行
-     */
-    static safeEval(code, allowedFunctions = []) {
-        // 创建安全的执行环境
-        const safeGlobals = {
-            console: {
-                log: console.log.bind(console)
-            }
-        };
-        
-        // 添加允许的函数
-        allowedFunctions.forEach(func => {
-            if (typeof window[func] === 'function') {
-                safeGlobals[func] = window[func];
-            }
-        });
-        
-        try {
-            // 使用 Function 构造器替代 eval
-            const func = new Function(
-                ...Object.keys(safeGlobals),
-                `"use strict"; ${code}`
-            );
-            
-            return func(...Object.values(safeGlobals));
-        } catch (error) {
-            console.error('安全执行失败:', error);
-            return null;
-        }
-    }
-    
-    /**
-     * URL 安全检查
-     */
-    static isUrlSafe(url) {
-        if (!url) return false;
-        
-        try {
-            const urlObj = new URL(url);
-            
-            // 检查协议
-            const allowedProtocols = ['http:', 'https:', 'mailto:', 'tel:'];
-            if (!allowedProtocols.includes(urlObj.protocol)) {
-                return false;
-            }
-            
-            // 检查是否为 javascript: 协议
-            if (url.toLowerCase().startsWith('javascript:')) {
-                return false;
-            }
-            
-            return true;
-        } catch (error) {
-            return false;
-        }
-    }
-}
+### 跨站攻击防护 🔐
 
-// 使用示例
-class SafeCommentSystem {
-    constructor(containerElement) {
-        this.container = containerElement;
-        this.comments = [];
-    }
-    
-    addComment(authorName, content) {
-        // 输入验证
-        if (!authorName || !content) {
-            throw new Error('作者名和内容不能为空');
-        }
-        
-        // XSS 防护
-        const safeAuthor = XSSProtection.htmlEncode(authorName);
-        const safeContent = XSSProtection.htmlEncode(content);
-        
-        const comment = {
-            id: Date.now(),
-            author: safeAuthor,
-            content: safeContent,
-            timestamp: new Date().toISOString()
-        };
-        
-        this.comments.push(comment);
-        this.renderComments();
-    }
-    
-    renderComments() {
-        const html = this.comments.map(comment => `
-            <div class="comment" data-id="${comment.id}">
-                <div class="comment-author">${comment.author}</div>
-                <div class="comment-content">${comment.content}</div>
-                <div class="comment-time">${new Date(comment.timestamp).toLocaleString()}</div>
-            </div>
-        `).join('');
-        
-        // 安全设置 HTML
-        XSSProtection.safeSetInnerHTML(this.container, html);
-    }
-    
-    loadCommentsFromUrl(url) {
-        // URL 安全检查
-        if (!XSSProtection.isUrlSafe(url)) {
-            throw new Error('不安全的URL');
-        }
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                // 清理接收到的数据
-                data.forEach(comment => {
-                    this.addComment(comment.author, comment.content);
-                });
-            })
-            .catch(error => {
-                console.error('加载评论失败:', error);
-            });
-    }
-}
+#### 题目3：XSS攻击全面防护体系
+**问题背景**：构建完整的XSS攻击防护体系和安全编码规范
 
-// CSP 违规报告处理
-document.addEventListener('securitypolicyviolation', function(event) {
-    console.warn('CSP 违规:', {
-        violatedDirective: event.violatedDirective,
-        blockedURI: event.blockedURI,
-        lineNumber: event.lineNumber,
-        columnNumber: event.columnNumber,
-        sourceFile: event.sourceFile
-    });
-    
-    // 发送违规报告到服务器
-    fetch('/csp-report', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            violatedDirective: event.violatedDirective,
-            blockedURI: event.blockedURI,
-            documentURI: event.documentURI,
-            timestamp: new Date().toISOString()
-        })
-    });
-});
-```
+**技术挑战**：
+- 存储型、反射型、DOM型XSS的识别和防护
+- 内容安全策略(CSP)的设计和实施
+- 输出编码和上下文感知的安全处理
+- 富文本编辑器的安全实现
 
-## CSRF 跨站请求伪造
+**考察要点**：
+- XSS攻击类型的准确识别和分析
+- 多层次防护机制的设计和实现
+- 前端安全编码的最佳实践
+- 安全策略的配置和管理
 
-#### 3. **[中级]** CSRF 攻击原理和防护机制
+**📁 完整解决方案**：[XSS防护完整体系](../../solutions/common/xss-protection-system.md)
 
-**CSRF 攻击流程：**
+#### 题目4：CSRF攻击防护和会话安全
+**问题背景**：实现CSRF攻击防护和安全的会话管理机制
 
-```mermaid
-sequenceDiagram
-    participant User as 用户
-    participant Bank as 银行网站
-    participant Evil as 恶意网站
-    
-    User->>Bank: 1. 正常登录
-    Bank->>User: 2. 返回认证Cookie
-    User->>Evil: 3. 访问恶意网站
-    Evil->>Bank: 4. 发送伪造请求（携带Cookie）
-    Bank->>Bank: 5. 验证Cookie（通过）
-    Bank->>Evil: 6. 执行恶意操作
-    Evil->>User: 7. 显示正常页面
-```
+**技术挑战**：
+- CSRF攻击的识别和防护策略
+- 安全Token的生成和验证机制
+- 会话固定和会话劫持的防护
+- 单点登录(SSO)的安全实现
 
-**CSRF 防护实现：**
+**考察要点**：
+- CSRF攻击原理和防护机制的理解
+- 会话管理的安全设计能力
+- 认证和授权机制的实现
+- 分布式环境下的会话安全
 
-```python
-# Python Django CSRF 防护示例
-import hashlib
-import hmac
-import secrets
-import time
-from django.conf import settings
-from django.http import HttpResponseForbidden
-from django.middleware.csrf import get_token
-from django.views.decorators.csrf import csrf_protect
-from django.utils.decorators import method_decorator
+**📁 完整解决方案**：[CSRF防护和会话安全](../../solutions/common/csrf-session-security.md)
 
-class CSRFProtection:
-    """CSRF 防护工具类"""
-    
-    @staticmethod
-    def generate_csrf_token(session_key=None):
-        """生成 CSRF Token"""
-        if not session_key:
-            session_key = secrets.token_urlsafe(32)
-        
-        timestamp = str(int(time.time()))
-        message = f"{session_key}:{timestamp}"
-        
-        # 使用HMAC生成签名
-        signature = hmac.new(
-            settings.SECRET_KEY.encode(),
-            message.encode(),
-            hashlib.sha256
-        ).hexdigest()
-        
-        return f"{timestamp}:{signature}"
-    
-    @staticmethod
-    def verify_csrf_token(token, session_key, max_age=3600):
-        """验证 CSRF Token"""
-        if not token or ':' not in token:
-            return False
-        
-        try:
-            timestamp_str, signature = token.split(':', 1)
-            timestamp = int(timestamp_str)
-            
-            # 检查时间有效性
-            if time.time() - timestamp > max_age:
-                return False
-            
-            # 重新生成签名进行比较
-            message = f"{session_key}:{timestamp_str}"
-            expected_signature = hmac.new(
-                settings.SECRET_KEY.encode(),
-                message.encode(),
-                hashlib.sha256
-            ).hexdigest()
-            
-            return hmac.compare_digest(signature, expected_signature)
-            
-        except (ValueError, TypeError):
-            return False
+### 身份认证与授权 🔑
 
-# 自定义 CSRF 中间件
-class CustomCSRFMiddleware:
-    """自定义 CSRF 中间件"""
-    
-    def __init__(self, get_response):
-        self.get_response = get_response
-    
-    def __call__(self, request):
-        # 处理请求前
-        if request.method in ('POST', 'PUT', 'DELETE', 'PATCH'):
-            if not self.verify_csrf(request):
-                return HttpResponseForbidden("CSRF verification failed")
-        
-        response = self.get_response(request)
-        
-        # 处理响应后
-        if request.method == 'GET':
-            # 为GET请求生成CSRF token
-            csrf_token = CSRFProtection.generate_csrf_token(
-                request.session.session_key
-            )
-            response.set_cookie('csrftoken', csrf_token, httponly=False)
-        
-        return response
-    
-    def verify_csrf(self, request):
-        """验证 CSRF"""
-        # 获取token
-        csrf_token = (
-            request.POST.get('csrfmiddlewaretoken') or
-            request.META.get('HTTP_X_CSRFTOKEN') or
-            request.COOKIES.get('csrftoken')
-        )
-        
-        if not csrf_token:
-            return False
-        
-        # 验证token
-        return CSRFProtection.verify_csrf_token(
-            csrf_token,
-            request.session.session_key
-        )
+#### 题目5：现代身份认证体系设计
+**问题背景**：设计安全可靠的身份认证和授权体系
 
-# 双重提交Cookie模式
-class DoubleSubmitCSRF:
-    """双重提交Cookie CSRF防护"""
-    
-    @staticmethod
-    def generate_token():
-        """生成随机token"""
-        return secrets.token_urlsafe(32)
-    
-    @staticmethod
-    def set_csrf_cookie(response, token):
-        """设置CSRF Cookie"""
-        response.set_cookie(
-            'csrf_token',
-            token,
-            max_age=3600,
-            secure=True,      # HTTPS only
-            httponly=False,   # JavaScript 可访问
-            samesite='Strict' # 同站策略
-        )
-    
-    @staticmethod
-    def verify_double_submit(request):
-        """验证双重提交"""
-        cookie_token = request.COOKIES.get('csrf_token')
-        
-        # 从请求头或表单获取token
-        request_token = (
-            request.META.get('HTTP_X_CSRF_TOKEN') or
-            request.POST.get('csrf_token')
-        )
-        
-        if not cookie_token or not request_token:
-            return False
-        
-        return hmac.compare_digest(cookie_token, request_token)
+**技术挑战**：
+- 多因素认证(MFA)的实现和集成
+- JWT令牌的安全使用和管理
+- OAuth 2.0和OpenID Connect的实现
+- 生物识别和无密码认证技术
 
-# 使用示例
-@method_decorator(csrf_protect, name='dispatch')
-class SecureTransferView(View):
-    """安全转账视图"""
-    
-    def get(self, request):
-        # 生成CSRF token
-        csrf_token = get_token(request)
-        
-        return render(request, 'transfer.html', {
-            'csrf_token': csrf_token
-        })
-    
-    def post(self, request):
-        # CSRF 验证由装饰器自动处理
-        
-        # 额外的业务验证
-        amount = request.POST.get('amount')
-        to_account = request.POST.get('to_account')
-        
-        # 验证金额
-        try:
-            amount = float(amount)
-            if amount <= 0:
-                raise ValueError("金额必须大于0")
-        except (ValueError, TypeError):
-            return JsonResponse({'error': '无效的金额'}, status=400)
-        
-        # 验证账户
-        if not self.validate_account(to_account):
-            return JsonResponse({'error': '无效的目标账户'}, status=400)
-        
-        # 执行转账
-        try:
-            self.process_transfer(request.user, to_account, amount)
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-    
-    def validate_account(self, account):
-        """验证账户有效性"""
-        # 账户验证逻辑
-        return account and len(account) >= 10
-    
-    def process_transfer(self, user, to_account, amount):
-        """处理转账业务"""
-        # 转账业务逻辑
-        pass
-```
+**考察要点**：
+- 现代认证技术的深度理解
+- 安全令牌的设计和管理
+- 联合身份认证的实现能力
+- 用户体验和安全性的平衡
 
-## SQL 注入攻击
+**📁 完整解决方案**：[现代身份认证系统](../../solutions/common/modern-authentication-system.md)
 
-#### 4. **[高级]** SQL 注入攻击类型和防护策略
+### 传输和数据安全 🛡️
 
-**SQL 注入防护：**
+#### 题目6：HTTPS和数据加密安全实践
+**问题背景**：实现全面的传输层安全和敏感数据保护
 
-```python
-# Python SQL 注入防护示例
-import sqlite3
-import pymysql
-from typing import List, Dict, Any, Optional
-import logging
+**技术挑战**：
+- TLS/SSL协议的配置和优化
+- 证书管理和PKI基础设施
+- 敏感数据的加密存储和传输
+- 密钥管理和轮换策略
 
-class SecureDatabase:
-    """安全的数据库操作类"""
-    
-    def __init__(self, connection):
-        self.conn = connection
-        self.logger = logging.getLogger(__name__)
-    
-    def execute_query(self, query: str, params: tuple = None) -> List[Dict[str, Any]]:
-        """安全执行查询"""
-        try:
-            cursor = self.conn.cursor(dictionary=True)
-            
-            # 记录查询日志（不包含敏感参数）
-            self.logger.info(f"执行查询: {query}")
-            
-            if params:
-                cursor.execute(query, params)
-            else:
-                cursor.execute(query)
-            
-            results = cursor.fetchall()
-            cursor.close()
-            
-            return results
-            
-        except Exception as e:
-            self.logger.error(f"查询执行失败: {e}")
-            raise
-    
-    def get_user_by_id(self, user_id: int) -> Optional[Dict[str, Any]]:
-        """根据ID获取用户（安全方式）"""
-        # 使用参数化查询
-        query = "SELECT * FROM users WHERE id = %s"
-        results = self.execute_query(query, (user_id,))
-        
-        return results[0] if results else None
-    
-    def search_users(self, search_term: str) -> List[Dict[str, Any]]:
-        """搜索用户（防注入）"""
-        # 输入验证
-        if not search_term or len(search_term.strip()) == 0:
-            return []
-        
-        # 清理输入
-        safe_term = self.sanitize_search_term(search_term)
-        
-        # 使用参数化查询和LIKE操作
-        query = """
-        SELECT id, username, email, created_at 
-        FROM users 
-        WHERE username LIKE %s OR email LIKE %s
-        LIMIT 100
-        """
-        
-        like_pattern = f"%{safe_term}%"
-        return self.execute_query(query, (like_pattern, like_pattern))
-    
-    def sanitize_search_term(self, term: str) -> str:
-        """清理搜索词"""
-        # 移除SQL关键字和特殊字符
-        dangerous_patterns = [
-            'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'CREATE',
-            'ALTER', 'EXEC', 'UNION', 'SCRIPT', '--', ';', '"', "'",
-            'OR', 'AND', '=', '<', '>', '(', ')', '{', '}', '[', ']'
-        ]
-        
-        clean_term = term
-        for pattern in dangerous_patterns:
-            clean_term = clean_term.replace(pattern.lower(), '')
-            clean_term = clean_term.replace(pattern.upper(), '')
-        
-        # 限制长度
-        return clean_term[:50].strip()
-    
-    def create_user(self, username: str, email: str, password_hash: str) -> int:
-        """创建用户（安全方式）"""
-        # 输入验证
-        if not self.validate_username(username):
-            raise ValueError("无效的用户名")
-        
-        if not self.validate_email(email):
-            raise ValueError("无效的邮箱地址")
-        
-        # 使用参数化查询
-        query = """
-        INSERT INTO users (username, email, password_hash, created_at)
-        VALUES (%s, %s, %s, NOW())
-        """
-        
-        cursor = self.conn.cursor()
-        try:
-            cursor.execute(query, (username, email, password_hash))
-            user_id = cursor.lastrowid
-            self.conn.commit()
-            
-            self.logger.info(f"创建用户成功: {username}")
-            return user_id
-            
-        except Exception as e:
-            self.conn.rollback()
-            self.logger.error(f"创建用户失败: {e}")
-            raise
-        finally:
-            cursor.close()
-    
-    def validate_username(self, username: str) -> bool:
-        """验证用户名"""
-        import re
-        
-        if not username or len(username) < 3 or len(username) > 30:
-            return False
-        
-        # 只允许字母、数字和下划线
-        pattern = re.compile(r'^[a-zA-Z0-9_]+$')
-        return bool(pattern.match(username))
-    
-    def validate_email(self, email: str) -> bool:
-        """验证邮箱地址"""
-        import re
-        
-        if not email or len(email) > 100:
-            return False
-        
-        pattern = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-        return bool(pattern.match(email))
+**考察要点**：
+- 加密技术的原理和应用
+- 证书和密钥管理的实践
+- 数据保护的合规要求
+- 性能和安全的平衡考虑
 
-# ORM 方式防护（使用 SQLAlchemy）
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from datetime import datetime
+**📁 完整解决方案**：[传输和数据安全实现](../../solutions/common/transport-data-security.md)
 
-Base = declarative_base()
+## 📊 面试评分标准
 
-class User(Base):
-    __tablename__ = 'users'
-    
-    id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    password_hash = Column(String(255), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+### 安全理论基础 (30分)
+- **威胁识别**：准确识别和分析各类Web安全威胁
+- **攻击原理**：深入理解攻击技术的实现原理
+- **防护机制**：掌握相应的防护技术和实现方法
 
-class SecureUserService:
-    """安全的用户服务（ORM方式）"""
-    
-    def __init__(self, session):
-        self.session = session
-    
-    def get_user_by_id(self, user_id: int) -> Optional[User]:
-        """根据ID获取用户"""
-        # ORM 自动防护 SQL 注入
-        return self.session.query(User).filter(User.id == user_id).first()
-    
-    def search_users_safe(self, search_term: str) -> List[User]:
-        """安全搜索用户"""
-        if not search_term:
-            return []
-        
-        # 使用 ORM 的参数化查询
-        return self.session.query(User).filter(
-            User.username.like(f'%{search_term}%') |
-            User.email.like(f'%{search_term}%')
-        ).limit(100).all()
-    
-    def execute_raw_query_safe(self, search_term: str) -> List[Dict]:
-        """安全执行原生SQL（当必要时）"""
-        # 使用 text() 和参数绑定
-        query = text("""
-            SELECT id, username, email 
-            FROM users 
-            WHERE username LIKE :search_term 
-            LIMIT 100
-        """)
-        
-        result = self.session.execute(
-            query, 
-            {'search_term': f'%{search_term}%'}
-        )
-        
-        return [dict(row) for row in result]
+### 实践应用能力 (40分)
+- **安全编码**：具备安全编码的实践能力
+- **工具使用**：熟练使用安全测试和检测工具
+- **问题解决**：能够分析和解决实际的安全问题
 
-# 输入验证装饰器
-def validate_sql_input(param_name: str):
-    """SQL 输入验证装饰器"""
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            if param_name in kwargs:
-                value = kwargs[param_name]
-                if not SecureDatabase.validate_sql_input(value):
-                    raise ValueError(f"Invalid input for {param_name}")
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+### 架构设计能力 (30分)
+- **安全架构**：能够设计安全的系统架构
+- **风险评估**：具备安全风险评估和管理能力
+- **合规实践**：了解相关安全标准和合规要求
 
-# 使用示例
-def demo_secure_database():
-    """安全数据库使用示例"""
-    
-    # 创建数据库连接
-    conn = pymysql.connect(
-        host='localhost',
-        user='username',
-        password='password',
-        database='test_db',
-        charset='utf8mb4'
-    )
-    
-    # 创建安全数据库操作实例
-    db = SecureDatabase(conn)
-    
-    try:
-        # 安全的用户查询
-        user = db.get_user_by_id(123)
-        print(f"找到用户: {user}")
-        
-        # 安全的搜索
-        users = db.search_users("john")
-        print(f"搜索结果: {len(users)} 个用户")
-        
-        # 安全的用户创建
-        user_id = db.create_user(
-            username="newuser",
-            email="newuser@example.com",
-            password_hash="hashed_password"
-        )
-        print(f"创建用户ID: {user_id}")
-        
-    finally:
-        conn.close()
+## 🎯 备考建议
 
-if __name__ == '__main__':
-    demo_secure_database()
-```
+### 学习路径
+1. **基础理论**：学习Web安全的基本概念和原理
+2. **攻击技术**：了解常见攻击手段和实现方式
+3. **防护机制**：掌握相应的防护技术和实现方法
+4. **实践演练**：通过实际项目和练习平台加深理解
+5. **持续学习**：关注最新的安全威胁和防护技术
 
-## 🔗 相关链接
+### 技术重点
+- **OWASP Top 10**：深入理解十大安全风险
+- **安全编码**：掌握安全编码的最佳实践
+- **渗透测试**：了解基本的渗透测试方法
+- **安全工具**：熟练使用常见的安全测试工具
+- **合规标准**：了解相关的安全标准和要求
 
-- [← 返回后端面试题](./README.md)
-- [身份认证面试题](./authentication.md)
-- [HTTPS 和传输安全](./https-security.md)
-- [安全编码实践](./secure-coding.md)
+### 实践项目建议
+- 构建安全的Web应用框架
+- 实现完整的身份认证系统
+- 开发安全审计和监控系统
+- 设计安全的API网关
+- 创建安全培训和测试平台
+
+### 学习资源
+- **OWASP官方资源**：权威的Web安全指南
+- **安全社区**：参与安全技术交流社区
+- **在线课程**：系统学习Web安全课程
+- **实验平台**：使用WebGoat、DVWA等练习平台
+- **安全会议**：关注安全技术会议和分享
+
+## 🔗 相关资源链接
+
+- [API设计面试题](./api-design.md)
+- [认证授权面试题](./authentication.md)
+- [系统设计面试题](../system-design/README.md)
+- [监控调试面试题](./monitoring-debugging.md)
+- [← 返回后端面试题目录](./README.md)
 
 ---
 
-*构建安全的Web应用，防范各种安全威胁* 🔒 
+*安全是Web应用的生命线，掌握全面的安全知识是每个开发者的必修课* 🔒 
